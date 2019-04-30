@@ -1,0 +1,2348 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
+<meta name="generator" content="pdoc 0.5.3" />
+<title>bioenergetics..model API documentation</title>
+<meta name="description" content="Linked Bioenergetics and foraging model …" />
+<link href='https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.0/normalize.min.css' rel='stylesheet'>
+<link href='https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/8.0.0/sanitize.min.css' rel='stylesheet'>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/github.min.css" rel="stylesheet">
+<style>.flex{display:flex !important}body{line-height:1.5em}#content{padding:20px}#sidebar{padding:30px;overflow:hidden}.http-server-breadcrumbs{font-size:130%;margin:0 0 15px 0}#footer{font-size:.75em;padding:5px 30px;border-top:1px solid #ddd;text-align:right}#footer p{margin:0 0 0 1em;display:inline-block}#footer p:last-child{margin-right:30px}h1,h2,h3,h4,h5{font-weight:300}h1{font-size:2.5em;line-height:1.1em}h2{font-size:1.75em;margin:1em 0 .50em 0}h3{font-size:1.4em;margin:25px 0 10px 0}h4{margin:0;font-size:105%}a{color:#058;text-decoration:none;transition:color .3s ease-in-out}a:hover{color:#e82}.title code{font-weight:bold}h2[id^="header-"]{margin-top:2em}.ident{color:#900}pre code{background:#f8f8f8;font-size:.8em;line-height:1.4em}code{background:#f2f2f1;padding:1px 4px;overflow-wrap:break-word}h1 code{background:transparent}pre{background:#f8f8f8;border:0;border-top:1px solid #ccc;border-bottom:1px solid #ccc;margin:1em 0;padding:1ex}#http-server-module-list{display:flex;flex-flow:column}#http-server-module-list div{display:flex}#http-server-module-list dt{min-width:10%}#http-server-module-list p{margin-top:0}.toc ul,#index{list-style-type:none;margin:0;padding:0}#index code{background:transparent}#index h3{border-bottom:1px solid #ddd}#index ul{padding:0}#index h4{font-weight:bold}#index h4 + ul{margin-bottom:.6em}@media (min-width:200ex){#index .two-column{column-count:2}}@media (min-width:300ex){#index .two-column{column-count:3}}dl{margin-bottom:2em}dl dl:last-child{margin-bottom:4em}dd{margin:0 0 1em 3em}#header-classes + dl > dd{margin-bottom:3em}dd dd{margin-left:2em}dd p{margin:10px 0}.name{background:#eee;font-weight:bold;font-size:.85em;padding:5px 10px;display:inline-block;min-width:40%}.name:hover{background:#e0e0e0}.name > span:first-child{white-space:nowrap}.name.class > span:nth-child(2){margin-left:.4em}.name small{font-weight:normal}.inherited{color:#999;border-left:5px solid #eee;padding-left:1em}.inheritance em{font-style:normal;font-weight:bold}.desc h2{font-weight:400;font-size:1.25em}.desc h3{font-size:1em}.desc dt code{background:inherit}.source summary{color:#666;text-align:right;font-weight:400;font-size:.8em;text-transform:uppercase;cursor:pointer}.source pre{max-height:500px;overflow:auto;margin:0}.source pre code{font-size:12px;overflow:visible}.hlist{list-style:none}.hlist li{display:inline}.hlist li:after{content:',\2002'}.hlist li:last-child:after{content:none}.hlist .hlist{display:inline;padding-left:1em}img{max-width:100%}.admonition{padding:.1em .5em}.admonition-title{font-weight:bold}.admonition.note,.admonition.info,.admonition.important{background:#aef}.admonition.todo,.admonition.versionadded,.admonition.tip,.admonition.hint{background:#dfd}.admonition.warning,.admonition.versionchanged,.admonition.deprecated{background:#fd4}.admonition.error,.admonition.danger,.admonition.caution{background:lightpink}</style>
+<style media="screen and (min-width: 700px)">@media screen and (min-width:700px){#sidebar{width:30%}#content{width:70%;max-width:100ch;padding:3em 4em;border-left:1px solid #ddd}pre code{font-size:1em}.item .name{font-size:1em}main{display:flex;flex-direction:row-reverse;justify-content:flex-end}.toc ul ul,#index ul{padding-left:1.5em}.toc > ul > li{margin-top:.5em}}</style>
+<style media="print">@media print{#sidebar h1{page-break-before:always}.source{display:none}}@media print{*{background:transparent !important;color:#000 !important;box-shadow:none !important;text-shadow:none !important}a[href]:after{content:" (" attr(href) ")";font-size:90%}a[href][title]:after{content:none}abbr[title]:after{content:" (" attr(title) ")"}.ir a:after,a[href^="javascript:"]:after,a[href^="#"]:after{content:""}pre,blockquote{border:1px solid #999;page-break-inside:avoid}thead{display:table-header-group}tr,img{page-break-inside:avoid}img{max-width:100% !important}@page{margin:0.5cm}p,h2,h3{orphans:3;widows:3}h1,h2,h3,h4,h5,h6{page-break-after:avoid}}</style>
+</head>
+<body>
+<main>
+<article id="content">
+<header>
+<h1 class="title"><code>bioenergetics..model</code> module</h1>
+</header>
+<section id="section-intro">
+<p>Linked Bioenergetics and foraging model</p>
+<p>This file is part of GrowChinook.</p>
+<p>GrowChinook is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 2 of the License, or
+(at your option) any later version.</p>
+<p>GrowChinook is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+See the
+GNU General Public License for more details.</p>
+<p>You should have received a copy of the GNU General Public License
+along with GrowChinook.
+If not, see <a href="https://www.gnu.org/licenses/">https://www.gnu.org/licenses/</a>.</p>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">&#34;&#34;&#34;Linked Bioenergetics and foraging model
+
+    This file is part of GrowChinook.
+
+    GrowChinook is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 2 of the License, or
+    (at your option) any later version.
+
+    GrowChinook is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with GrowChinook.  If not, see &lt;https://www.gnu.org/licenses/&gt;.
+
+&#34;&#34;&#34;
+
+
+from collections import defaultdict
+import numpy as np
+from scipy.interpolate import interp1d
+from scipy.optimize import minimize, brute
+
+from bioenergetics import params
+
+O2CONV = 13560
+&#34;&#34;&#34;J/gram of O2 in respiration conversions (Elliot and Davison 1975).&#34;&#34;&#34;
+
+class InterpolatedFunction(object):
+    &#34;&#34;&#34;Wrapper for an interpolated function
+
+    Given a set of x and y values, create an interpolated function
+    which may be accessed by calling the class instance. The class
+    will also contain read-only properties that return the original
+    data points as well as their domain and range.
+
+    Optional parameters clip_min and clip_max may be given to exclude
+    datapoints where the function value exceeds a specified range.
+
+    Example:
+    ```
+    depths = [0,1,2,3,4,5]
+    temperatures = [25,23,21,20,19,17.5]
+    temp_fn = InterpolatedDepthFunction(depths, temperatures, clip_max=4)
+    t3_5 = temp_fn(3.5)
+    ```
+
+    Attributes:
+        x: The x-values used to initialize the instance
+        y: The y-values used to initialize the instance
+        domain: A two-element tuple containing the minimum and maximum x-values
+        range: A two-element tuple contianing the minimum and maximum y-values
+    &#34;&#34;&#34;
+
+    def __init__(self, x, y, clip_max=None, clip_min=None):
+        &#34;&#34;&#34;Constructor method
+
+        Args:
+            x: A collection of numeric values
+            y: A collection of numeric values
+            clip_max: An optional numeric value. If given, all x,y pairs
+                where y &gt; clip_max will be ignored.
+            clip_min: An optional numeric value. If given, all x,y pairs
+                where y &lt; clip_min will be ignored
+
+        Returns:
+            The initialized instance
+        &#34;&#34;&#34;
+        idx = np.argsort(x)
+        x = np.sort(x)
+        y = np.array(y)[idx]
+
+        # clip values
+        idx = np.repeat(True, y.size)
+        if clip_max:
+            idx = np.logical_and(idx, (y &lt;= clip_max))
+        if clip_min:
+            idx = np.logical_and(idx, (y &gt;= clip_min))
+
+        self._x = x
+        self._y = y
+        self._domain = (np.min(x),np.max(x))
+        self._range = (np.min(y), np.max(y))
+
+        self.fn = interp1d(x,y,bounds_error=False,fill_value=(y[0], y[-1]))
+
+    def __call__(self, d):
+        return self.fn(d)
+
+    @property
+    def x(self):
+        return self._x
+
+    @property
+    def y(self):
+        return self._y
+
+    @property
+    def domain(self):
+        return self._domain
+
+    @property
+    def range(self):
+        return self._range
+
+
+class Model:
+    &#34;&#34;&#34;Linked bioenergetics and foraging model
+
+    This class links the Wisconsin bioenergetics model with a visual
+    foraging model to simulate optimal growth for a fish species. As
+    inputs, it requires parameters describing temperature depth
+    profiles, bathymetry, prey abundance, and species-specific
+    bioenergetics parameters. See the documentation for
+    `bioenergetics.model.Model.__init__` for more details.
+
+    Once instantiated, the `bioenergetics.model.Model.run`
+    method will simulate a period of several days (default 30),
+    determining the day- and night-time depths which
+    optimize the fish&#39;s growth during that period.
+
+    &#34;&#34;&#34;
+    def __init__(self, starting_mass, prey_data, temp_fn, bathymetry_fn,
+                 day_hours, light_extinction, params=params.Chinook(),
+                 depth_max=10000, depth_min=-1, day_light=850, night_light=0.1,
+                 surface_elevation=100000):
+        &#34;&#34;&#34;Constructor method
+
+        Args:
+            starting_mass: The starting mass of the fish in grams.
+            prey_data: A `bioenergetics.prey.PreyData` instance.
+            temp_fn: A `bioenergetics.model.InterpolatedFunction`
+                instance representing temperature in degrees C as a function of
+                depth in meters.
+            bathymetry_fn: An instance of
+                `bioenergetics.model.InterpolatedFunction`
+                 representing surface area in meters^2 as a function of
+                elevation in meters.
+            day_hours: A numeric value specifying the day length in hours.
+            light_extinction: The light extinction coefficient.
+            params: An optional `bioenergetics.params.FishParameters` instance
+                containing the parameters for the fish species being modeled.
+                Defaults to an instance of `bioenergetics.params.Chinook`.
+            depth_max: An optional numeric value that caps the maximum
+                simulated depth. If no value is given, this is equal the
+                maximum `domain` value of `temp_fn`
+            depth_min: An optional numeric value that caps the minimum
+                simulated depth. If no value is given, this is equal the
+                minimum `domain` value of `temp_fn`
+            day_light: An optional numeric value specifying the surface light
+                intensity during day time, in lux. Defaults to 850.
+            night_light: An optional numeric value specifying the surface light
+                intensity during night time, in lux. Defaults to 0.1.
+            surface_elevation: An optional numeric value specifying the
+                elevation of the water&#39;s surface in meters. If not given,
+                this is derived from the the `domain` value of `bathymetry_fn`.
+        &#34;&#34;&#34;
+        self.prey_data = prey_data
+        self.light_extinction = light_extinction
+        self.starting_mass = starting_mass
+        self.depth_min = max(depth_min, temp_fn.domain[0])
+        self.depth_max = max(min(depth_max, temp_fn.domain[1]),
+                             self.depth_min+0.2)
+        self.day_hours = day_hours
+        self.depths = []
+        self.surface_elevation = min(surface_elevation,
+                                     bathymetry_fn.domain[1])
+        self.params = params
+
+        self.day_light = day_light
+        self.night_light = night_light
+
+        self.starting_length = params.length_from_weight(self.starting_mass)
+        self.temp_from_depth = temp_fn
+        self.area_from_elevation = bathymetry_fn
+
+    def compute_foragingbydepth(self, length, mass, surface_light, depth):
+        &#34;&#34;&#34;Specific encounter rate for a fish of given size at a given depth.
+
+        Foraging from Beauchamps paper. Current reaction distance is from
+        Gregory and Northcote 1992.
+
+        Args:
+            length: Length of the fish in millimeters.
+            mass: Mass of the fish in grams.
+            surface_light: Intensity of light at the surface in lux.
+            depth: Depth in meters.
+
+        Returns:
+            The specific encounter rate in grams/gram/hour.
+        &#34;&#34;&#34;
+        light = surface_light * np.exp((-self.light_extinction) * depth)
+        depth = depth
+        # prey per cc
+        prey_density = self.prey_data.prey_count(depth) / 1000000
+        lightenergy = light/51.2
+
+        # Note that reaction distance is in cm
+        if lightenergy &lt; 1.045:
+            reactiondistance = 1.1
+        if lightenergy &gt;= 1.045:
+            suspendedsediment = -((np.log10(lightenergy) - 1.045)/(.0108))
+            if suspendedsediment &lt;= 0:
+                reactiondistance = 31.64
+            if suspendedsediment &gt; 0:
+                turbidity = .96*np.log10(suspendedsediment+1) - .002
+                reactiondistance = (31.64-13.31*turbidity)
+            # ~1.1 from this paper, 8 based on kokanee (is ~ the
+            # median observed for this Chinook study)
+            if reactiondistance &lt; 1.1:
+                reactiondistance = 1.1
+        swim_speed = self.params.swim_speed * length/10
+        searchvolume = np.pi * (reactiondistance ** 2) * swim_speed
+        # prey per hour
+        encounter_rate = searchvolume * prey_density * 60 * 60
+
+        # Capping ER based on 2017 Haskell et al.  Haskell equation is
+        # in L, daphnia are currently per cc and was per min, convert
+        # to hr. Haskell may underestimate maximum, note the high
+        # density corresponds to a pt ~48 that is not represented by
+        # the 29.858 cap
+        max_er = (29.858 * (prey_density * 1000) *
+                  ((4.271 + prey_density * 1000) ** (-1)) * 60)
+        if encounter_rate &gt; max_er:
+            encounter_rate = max_er
+
+        # use if want to further restrict capture
+        # encounter_rate = 0.9 * encounter_rate
+        gramsER = encounter_rate * self.prey_data.weight
+        return gramsER / mass
+
+    def compute_ft(self, temperature):
+        &#34;&#34;&#34;Temperature dependence of consumption.
+
+        Args:
+            temperature: Temperature in degrees C.
+
+        Returns:
+            A numeric value representing the temperature-dependent
+            coefficient of consumption.
+        &#34;&#34;&#34;
+        CQ = self.params[&#39;CQ&#39;]
+        CTL = self.params[&#39;CTL&#39;]
+        CTM = self.params[&#39;CTM&#39;]
+        CTO = self.params[&#39;CTO&#39;]
+        CK1 = self.params[&#39;CK1&#39;]
+        CK4 = self.params[&#39;CK4&#39;]
+        eq = self.params[&#39;c_eq&#39;]
+        if eq == 1:
+            return np.exp(CQ * temperature)
+        elif eq == 2:
+            V = (CTM - temperature) / (CTM - CTO)
+            Z = np.log(CQ) * (CTM - CTO)
+            Y = np.log(CQ) * (CTM - CTO + 2)
+            X = (Z ** 2 * (1 + (1 + 40 / Y) ** 0.5) ** 2) / 400
+            return (V ** X) * np.exp(X * (1 - V))
+        elif eq == 3:
+            G1 = (1 / (CTO - CQ)) * np.log((0.98 * (1 - CK1)) / (CK1 * 0.002))
+            G2 = (1 / (CTL - CTM)) * np.log((0.98 * (1 - CK4)) / (CK4 * 0.02))
+            L1 = np.exp(G1 * (temperature - CQ))
+            L2 = np.exp(G2 * (CTL - temperature))
+            K_A = (CK1 * L1) / (1 + CK1 * (L1 - 1))
+            K_B = (CK4 * L2) / (1 + CK4 * (L2 - 1))
+            return K_A * K_B
+        else:
+            raise ValueError(&#34;Unknown consumption equation type: &#34; + eq)
+
+
+    def compute_cmax(self, W):
+        &#34;&#34;&#34;Maximum consumption for a given weight.
+
+        Args:
+            W: mass in grams.
+
+        Returns:
+            Maximum specific feeding rate in grams/gram/day
+        &#34;&#34;&#34;
+        CA = self.params[&#39;CA&#39;]
+        CB = self.params[&#39;CB&#39;]
+        return CA * (W ** CB)
+
+    def compute_waste(self, consumption, P, temperature):
+        &#34;&#34;&#34;Waste losses (egestion and excretion)
+
+        Args:
+            consumption: specific consumption in grams/gram/day.
+            P: feeding level.
+            temperature: temperature in degrees C.
+
+        Returns:
+            A two-element tuple containing specific egestion (fecal waste),
+            and excretion (nitrogenous waste) rates in grams/gram/day.
+        &#34;&#34;&#34;
+        # Units are g/g/d
+        FA = self.params[&#39;FA&#39;]
+        FB = self.params[&#39;FB&#39;]
+        FG = self.params[&#39;FG&#39;]
+        UA = self.params[&#39;UA&#39;]
+        UB = self.params[&#39;UB&#39;]
+        UG = self.params[&#39;UG&#39;]
+        eq = self.params[&#39;egexeq&#39;]
+        if eq == 1:
+            egestion = FA * consumption
+            excretion = UA * (consumption - egestion)
+            return (egestion, excretion)
+        elif eq == 2:
+            egestion = FA * (temperature ** FB) * np.exp(FG * P) * consumption
+            excretion = (UA * (temperature ** UB) * np.exp(UG * P)
+                         * (consumption - egestion))
+            return (egestion, excretion)
+        elif eq == 3:
+            if self.prey_data.indigestibility is None:
+                raise ValueError(&#34;Prey indigestibility not defined&#34;)
+            PFF = self.prey_data.indigestibility
+            PE = FA * (temperature ** FB) * np.exp(FG * P)
+            PF = ((PE - 0.1) / 0.9) * (1 - PFF) + PFF
+            egestion = PF * consumption
+            excretion = (UA * (temperature ** UB) * np.exp(UG * P)
+                         * (consumption - egestion))
+            return (egestion, excretion)
+        else:
+            raise ValueError(&#34;Unknown egestion/excretion equation type: &#34; + eq)
+
+
+    def compute_respiration(self, W, temperature):
+        &#34;&#34;&#34;Respiration losses
+
+        Args:
+            W: mass in grams
+            temperature: temperature in degrees C
+
+        Returns:
+            Specific respiration rate in grams/gram/day
+        &#34;&#34;&#34;
+        RA = self.params[&#39;RA&#39;]
+        RB = self.params[&#39;RB&#39;]
+        RQ = self.params[&#39;RQ&#39;]
+        RTO = self.params[&#39;RTO&#39;]
+        RTM = self.params[&#39;RTM&#39;]
+        RTL = self.params[&#39;RTL&#39;]
+        RK1 = self.params[&#39;RK1&#39;]
+        RK4 = self.params[&#39;RK4&#39;]
+        ACT = self.params[&#39;ACT&#39;]
+        BACT = self.params[&#39;BACT&#39;]
+        eq = self.params[&#39;respeq&#39;]
+        if eq == 1:
+            if temperature &gt; RTL:
+                VEL = RK1 * mass ** RK4
+                print(&#34;SOME OF THE INCLUDED TEMPERATURES ARE LETHAL, &#34;
+                      &#34;PLEASE MODIFY THE TEMPERATURE TO EXCLUDE &#34;
+                      &#34;TEMPERATURES OVER 25C!&#34;)
+            else:
+                VEL = ACT * (W ** RK4) * np.exp(BACT * temperature)
+                FTmetabolism = np.exp(RQ * temperature)
+                activity = np.exp(RTO * VEL)
+        elif eq == 2:
+            Vresp = (RTM - temperature) / (RTM - RTO)
+            Zresp = np.log(RQ) * (RTM - RTO)
+            Yresp = np.log(RQ) * (RTM - RTO + 2)
+            Xresp = (((Zresp ** 2) * (1 + (1 + 40 / Yresp) ** 0.5)) ** 2) / 400
+            FTmetabolism = (Vresp ** Xresp) * np.exp(Xresp * (1 - Vresp))
+            activity = ACT
+        else:
+            raise ValueError(&#34;Unknown respiration equation type: &#34; + eq)
+        return (RA * (W ** RB) * FTmetabolism * activity)
+
+    def energy_density(self, W):
+        &#34;&#34;&#34;Predator energy density as a function of mass.
+
+        Args:
+            W: mass of fish in grams
+
+        Returns:
+            Energy density in joules/gram (wet mass).
+        &#34;&#34;&#34;
+        if self.params[&#39;prededeq&#39;] == 1:
+            return self.energy_density
+        elif self.params[&#39;prededeq&#39;] == 2:
+            if W &lt; self.params[&#39;cutoff&#39;]:
+                alpha = self.params[&#39;AlphaI&#39;]
+                beta = self.params[&#39;BetaI&#39;]
+            else:
+                alpha = self.params[&#39;AlphaII&#39;]
+                beta = self.params[&#39;BetaII&#39;]
+            return alpha + beta*W
+
+    def compute_growth(self, w, egain):
+        &#34;&#34;&#34;Growth as a function of mass and energy gain.
+
+        Args:
+            w: mass in grams
+            egain: energy gain in joules
+
+        Returns:
+            Amount of growth in grams. May be negative.
+        &#34;&#34;&#34;
+        if self.params[&#39;prededeq&#39;] == 1:
+            return w + egain/self.params[&#39;energydensity&#39;]
+        elif self.params[&#39;prededeq&#39;] == 2:
+            if w &lt; self.params[&#39;cutoff&#39;]:
+                alpha = self.params[&#39;AlphaI&#39;]
+                beta = self.params[&#39;BetaI&#39;]
+            elif w &gt;= self.params[&#39;cutoff&#39;]:
+                alpha = self.params[&#39;AlphaII&#39;]
+                beta = self.params[&#39;BetaII&#39;]
+
+            if beta != 0:
+                w_new = ((-alpha +
+                          np.sqrt(alpha**2 +
+                                  4*beta*(egain + w*(alpha+beta*w)))) /
+                         (2*beta))
+            else:
+                w_new = w + egain/alpha
+
+            crossed_cutoff = (w &lt; self.params[&#39;cutoff&#39;] &lt; w_new or
+                              w_new &lt; self.params[&#39;cutoff&#39;] &lt; w)
+            if crossed_cutoff:
+                egain_cutoff = (self.energy_density(self.params[&#39;cutoff&#39;]) -
+                                self.energy_density(w))
+                return (self.compute_growth(self.params[&#39;cutoff&#39;],
+                                            egain_cutoff)
+                        + (self.params[&#39;cutoff&#39;] - w))
+            else:
+                return w_new - w
+
+    def compute_bioenergetics(self, W, temp, P):
+        &#34;&#34;&#34;Compute components of the Wisconsin bioenergetics model.
+
+        Args:
+            W: mass in grams
+            temp: temperature in degrees C
+            P: feeding level
+
+        Returns:
+            A five-element tuple
+            `(consumption, egestion, excretion, respiration, SDAction)`
+        &#34;&#34;&#34;
+        cmax = self.compute_cmax(W)
+        ft = self.compute_ft(temp)
+        consumption = cmax * P * ft
+        (egestion, excretion) = self.compute_waste(consumption, P, temp)
+        respiration = self.compute_respiration(W, temp)
+        SDAction = self.params[&#39;SDA&#39;]*(consumption - egestion)
+        return (consumption, egestion, excretion, respiration, SDAction)
+
+    def best_depth(self, length, mass, x0=None):
+        &#34;&#34;&#34;Solve for optimal day- and night- time depths
+
+        Each day is divided into a day and night period, which entails
+        differing light levels affecting foraging efficiency. For each
+        period, find the depth that maximizes growth given the
+        light-dependent foraging level and metabolic rates derived
+        from the temperature at that depth.
+
+        Args:
+            length: Length in millimeters
+            mass: Mass in grams
+            x0: An optional parameter giving an initial guess for the
+                optimizer. A two-element tuple containing
+                `(day_depth, night_depth)` in meters. If not given, a grid
+                search will first be performed to provide the initial guess.
+
+        Returns:
+            A two-element tuple `(best_depths, best_results)`
+            best_depths: A two element tuple containing the day- and
+                night-time depths which produced the optimal growth.
+            best_results: Growth and bioenergetics rates corresponding
+                to the optimized depths, identical to the output of
+                `bioenergetics.model.Model.growth_fn`.
+
+        &#34;&#34;&#34;
+        day_hours = self.day_hours
+        night_hours = 24.0 - day_hours
+
+        def objective(x):
+            (day_depth,night_depth) = x
+            res = self.growth_fn(day_depth, night_depth, length,
+                                 mass, day_hours, night_hours)
+            return -res[0]
+        depth_bounds = (self.depth_min, self.depth_max)
+        if x0 is None:
+            # find an initial guess via grid search
+            x0 = brute(objective, (depth_bounds, depth_bounds))
+        res = minimize(objective, x0=x0,
+                       method=&#39;L-BFGS-B&#39;,
+                       bounds=[(self.depth_min, self.depth_max),
+                               (self.depth_min, self.depth_max)],
+                       jac=&#39;2-point&#39;, options={&#39;eps&#39;: 1e-3})
+        best_depths = res.x
+        (day_depth, night_depth) = best_depths
+        best_results = self.growth_fn(day_depth, night_depth, length,
+                                      mass, day_hours, night_hours)
+        return best_depths,  best_results
+
+    def growth_fn(self, day_depth, night_depth, length, mass,
+                  day_hours, night_hours):
+        &#34;&#34;&#34;Growth over a 24-hour period.
+
+        This function computes growth for a fish of given size,
+        located at given day- and night-time depths. It is used as an
+        optimization target in the `bioenergetics.model.Model.best_depth`
+        method.
+
+        Args:
+            day_depth: daytime depth in meters
+            night_depth: nighttime depth in meters
+            length: length in millimeters
+            mass: mass in grams
+            day_hours: daytime duration in hours
+            night_hours: nighttime duration in hours
+
+        Returns:
+            A 9-element tuple `(growth, consumption, egestion, excretion,
+            respiration, SDAction, P, day_P, night_P)`
+
+            growth: growth in grams
+            P: feeding level for entire 24-hour period
+            day_P: daytime feeding level
+            night_P: nighttime feeding level
+
+        &#34;&#34;&#34;
+        day_temp = self.temp_from_depth(day_depth)
+        night_temp = self.temp_from_depth(night_depth)
+        cmax = self.compute_cmax(mass)
+        day_foraging = self.compute_foragingbydepth(length, mass,
+                                                    self.day_light,
+                                                    day_depth)
+        night_foraging = self.compute_foragingbydepth(length, mass,
+                                                      self.night_light,
+                                                      night_depth)
+        if day_foraging &gt; night_foraging:
+            day_foraging *= day_hours
+            day_P = min(day_foraging/cmax, 1)
+            night_P = min(1.0 - day_P, night_foraging*night_hours)
+        else:
+            night_foraging *= night_hours
+            night_P = min(night_foraging/cmax, 1.0)
+            day_P = min(1.0 - night_P, day_foraging*day_hours)
+
+        day_bioe = self.compute_bioenergetics(mass, day_temp, day_P)
+        night_bioe = self.compute_bioenergetics(mass, night_temp, night_P)
+        day_bioe = np.array(day_bioe) * day_hours/24.0
+        night_bioe = np.array(night_bioe) * night_hours/24.0
+        (consumption, egestion, excretion, respiration, SDAction) = \
+            day_bioe + night_bioe
+        P = day_P + night_P
+        consumptionjoules = consumption * self.prey_data.energy
+        egain = (consumptionjoules -
+                 ((egestion + excretion + SDAction) * self.prey_data.energy
+                  + respiration * O2CONV))*mass
+        growth = self.compute_growth(mass, egain)
+        return (growth, consumption, egestion, excretion, respiration,
+                SDAction, P, day_P, night_P)
+
+    def sustainability_estimate(self, depth, consumed):
+        &#34;&#34;&#34;Estimate the number of fish which can grow optimally at a given
+        consumption rate, constrained by the prey abundance at the
+        given depth.
+
+        Args:
+            depth: depth in meters
+            consumed: number of individual prey consumed
+
+        Returns:
+            Estimated number of fish which can grow optimally.
+        &#34;&#34;&#34;
+        elevation = self.surface_elevation - depth
+        total_prey = self.prey_data.prey_count(depth)
+        area = self.area_from_elevation(elevation)
+        consumable = (area*total_prey*0.58)
+        pop_est = consumable/(consumed*4)
+        return pop_est
+
+    def run(self, n_days=30):
+        &#34;&#34;&#34;Simulate fish growth over a period of several days.
+
+        Beginning with a fish with a mass equal to
+        `bioenergetics.model.Model.starting_mass`, call
+        `bioenergetics.model.Model.best_depth` for each day, updating
+        the fish&#39;s mass each time.
+
+        Args:
+            n_days: An optional parameter specifying the number of days
+                to simulate. Defaults to 30.
+
+        Returns:
+            A dictionary containing simulation outputs. Each entry is a
+            list with `n_days` elements, corresponding to the values from
+            each day. The output contains the following keys:
+
+            mass: The mass of the fish in grams at the end of each day.
+            length: The length of fish in millimeters at the end of each day.
+            day_depth: The daytime depth of the fish in meters.
+            night_depth: The nighttime depth of the fish in meters.
+            consumption: The specific consumption in grams/gram/day.
+            respiration: The specific respiration in grams/gram/day.
+            egestion: The specific egestion in grams/gram/day.
+            excretion: The specific excretion in grams/gram/day.
+            P: The combined feeding rate for the day.
+            day_P: The daytime feeding rate.
+            night_P: The nighttime feeding rate.
+            day_temperature: The temperature corresponding to `day_depth`.
+            night_temperature: The temperature corresponding to `night_depth`.
+
+        &#34;&#34;&#34;
+        assert (n_days &gt;= 1), &#34;n_days must be a positive integer&#34;
+
+        out = defaultdict(list)
+        condition1 = float(100*self.starting_mass
+                           * ((self.starting_length/10)**(-3.0)))
+        last_best_depths = None
+        length = self.starting_length
+        mass = self.starting_mass
+        for d in range(n_days):
+            best_depths, best_results = self.best_depth(length, mass,
+                                                        last_best_depths)
+            (day_depth, night_depth) = best_depths
+            last_best_depths = best_depths
+            (growth, consumption, egestion, excretion,
+             respiration, SDAction, P, day_P, night_P) = best_results
+            day_temp = self.temp_from_depth(day_depth)
+            night_temp = self.temp_from_depth(night_depth)
+            dailyconsume = (consumption*mass) / self.prey_data.weight
+            mass += growth
+            if growth &gt; 0:
+                length = self.params.length_from_weight(mass)
+            out[&#39;day_depth&#39;].append(day_depth)
+            out[&#39;night_depth&#39;].append(night_depth)
+            out[&#39;growth&#39;].append(growth)
+            out[&#39;Mass&#39;].append(mass)
+            out[&#39;Length&#39;].append(length)
+            out[&#39;egestion&#39;].append(egestion)
+            out[&#39;excretion&#39;].append(excretion)
+            out[&#39;consumption&#39;].append(consumption)
+            out[&#39;P&#39;].append(P)
+            out[&#39;day_temperature&#39;].append(day_temp)
+            out[&#39;night_temperature&#39;].append(night_temp)
+            out[&#39;day_P&#39;].append(day_P)
+            out[&#39;night_P&#39;].append(night_P)
+
+        PopEst = self.sustainability_estimate(day_depth, dailyconsume)
+        condition = float(100*(mass-self.starting_mass)*((length/10)**(-3.0)))
+        return (out, dailyconsume, condition, condition1, PopEst, day_P, night_P)
+
+
+# documentation overrides
+__pdoc__ = {&#39;InterpolatedFunction.x&#39;: False,
+            &#39;InterpolatedFunction.y&#39;: False,
+            &#39;InterpolatedFunction.domain&#39;: False,
+            &#39;InterpolatedFunction.range&#39;: False}</code></pre>
+</details>
+</section>
+<section>
+</section>
+<section>
+<h2 class="section-title" id="header-variables">Global variables</h2>
+<dl>
+<dt id="bioenergetics..model.O2CONV"><code class="name">var <span class="ident">O2CONV</span></code></dt>
+<dd>
+<section class="desc"><p>J/gram of O2 in respiration conversions (Elliot and Davison 1975).</p></section>
+</dd>
+</dl>
+</section>
+<section>
+</section>
+<section>
+<h2 class="section-title" id="header-classes">Classes</h2>
+<dl>
+<dt id="bioenergetics..model.InterpolatedFunction"><code class="flex name class">
+<span>class <span class="ident">InterpolatedFunction</span></span>
+</code></dt>
+<dd>
+<section class="desc"><p>Wrapper for an interpolated function</p>
+<p>Given a set of x and y values, create an interpolated function
+which may be accessed by calling the class instance. The class
+will also contain read-only properties that return the original
+data points as well as their domain and range.</p>
+<p>Optional parameters clip_min and clip_max may be given to exclude
+datapoints where the function value exceeds a specified range.</p>
+<p>Example:</p>
+<pre><code>depths = [0,1,2,3,4,5]
+temperatures = [25,23,21,20,19,17.5]
+temp_fn = InterpolatedDepthFunction(depths, temperatures, clip_max=4)
+t3_5 = temp_fn(3.5)
+</code></pre>
+<h2 id="attributes">Attributes</h2>
+<dl>
+<dt><strong><code>x</code></strong></dt>
+<dd>The x-values used to initialize the instance</dd>
+<dt><strong><code>y</code></strong></dt>
+<dd>The y-values used to initialize the instance</dd>
+<dt><strong><code>domain</code></strong></dt>
+<dd>A two-element tuple containing the minimum and maximum x-values</dd>
+<dt><strong><code>range</code></strong></dt>
+<dd>A two-element tuple contianing the minimum and maximum y-values</dd>
+</dl></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">class InterpolatedFunction(object):
+    &#34;&#34;&#34;Wrapper for an interpolated function
+
+    Given a set of x and y values, create an interpolated function
+    which may be accessed by calling the class instance. The class
+    will also contain read-only properties that return the original
+    data points as well as their domain and range.
+
+    Optional parameters clip_min and clip_max may be given to exclude
+    datapoints where the function value exceeds a specified range.
+
+    Example:
+    ```
+    depths = [0,1,2,3,4,5]
+    temperatures = [25,23,21,20,19,17.5]
+    temp_fn = InterpolatedDepthFunction(depths, temperatures, clip_max=4)
+    t3_5 = temp_fn(3.5)
+    ```
+
+    Attributes:
+        x: The x-values used to initialize the instance
+        y: The y-values used to initialize the instance
+        domain: A two-element tuple containing the minimum and maximum x-values
+        range: A two-element tuple contianing the minimum and maximum y-values
+    &#34;&#34;&#34;
+
+    def __init__(self, x, y, clip_max=None, clip_min=None):
+        &#34;&#34;&#34;Constructor method
+
+        Args:
+            x: A collection of numeric values
+            y: A collection of numeric values
+            clip_max: An optional numeric value. If given, all x,y pairs
+                where y &gt; clip_max will be ignored.
+            clip_min: An optional numeric value. If given, all x,y pairs
+                where y &lt; clip_min will be ignored
+
+        Returns:
+            The initialized instance
+        &#34;&#34;&#34;
+        idx = np.argsort(x)
+        x = np.sort(x)
+        y = np.array(y)[idx]
+
+        # clip values
+        idx = np.repeat(True, y.size)
+        if clip_max:
+            idx = np.logical_and(idx, (y &lt;= clip_max))
+        if clip_min:
+            idx = np.logical_and(idx, (y &gt;= clip_min))
+
+        self._x = x
+        self._y = y
+        self._domain = (np.min(x),np.max(x))
+        self._range = (np.min(y), np.max(y))
+
+        self.fn = interp1d(x,y,bounds_error=False,fill_value=(y[0], y[-1]))
+
+    def __call__(self, d):
+        return self.fn(d)
+
+    @property
+    def x(self):
+        return self._x
+
+    @property
+    def y(self):
+        return self._y
+
+    @property
+    def domain(self):
+        return self._domain
+
+    @property
+    def range(self):
+        return self._range</code></pre>
+</details>
+<h3>Methods</h3>
+<dl>
+<dt id="bioenergetics..model.InterpolatedFunction.__init__"><code class="name flex">
+<span>def <span class="ident">__init__</span></span>(<span>self, x, y, clip_max=None, clip_min=None)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Constructor method</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>x</code></strong></dt>
+<dd>A collection of numeric values</dd>
+<dt><strong><code>y</code></strong></dt>
+<dd>A collection of numeric values</dd>
+<dt><strong><code>clip_max</code></strong></dt>
+<dd>An optional numeric value. If given, all x,y pairs
+where y &gt; clip_max will be ignored.</dd>
+<dt><strong><code>clip_min</code></strong></dt>
+<dd>An optional numeric value. If given, all x,y pairs
+where y &lt; clip_min will be ignored</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<p>The initialized instance</p></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">def __init__(self, x, y, clip_max=None, clip_min=None):
+    &#34;&#34;&#34;Constructor method
+
+    Args:
+        x: A collection of numeric values
+        y: A collection of numeric values
+        clip_max: An optional numeric value. If given, all x,y pairs
+            where y &gt; clip_max will be ignored.
+        clip_min: An optional numeric value. If given, all x,y pairs
+            where y &lt; clip_min will be ignored
+
+    Returns:
+        The initialized instance
+    &#34;&#34;&#34;
+    idx = np.argsort(x)
+    x = np.sort(x)
+    y = np.array(y)[idx]
+
+    # clip values
+    idx = np.repeat(True, y.size)
+    if clip_max:
+        idx = np.logical_and(idx, (y &lt;= clip_max))
+    if clip_min:
+        idx = np.logical_and(idx, (y &gt;= clip_min))
+
+    self._x = x
+    self._y = y
+    self._domain = (np.min(x),np.max(x))
+    self._range = (np.min(y), np.max(y))
+
+    self.fn = interp1d(x,y,bounds_error=False,fill_value=(y[0], y[-1]))</code></pre>
+</details>
+</dd>
+</dl>
+</dd>
+<dt id="bioenergetics..model.Model"><code class="flex name class">
+<span>class <span class="ident">Model</span></span>
+</code></dt>
+<dd>
+<section class="desc"><p>Linked bioenergetics and foraging model</p>
+<p>This class links the Wisconsin bioenergetics model with a visual
+foraging model to simulate optimal growth for a fish species. As
+inputs, it requires parameters describing temperature depth
+profiles, bathymetry, prey abundance, and species-specific
+bioenergetics parameters. See the documentation for
+<code>bioenergetics.model.Model.__init__</code> for more details.</p>
+<p>Once instantiated, the <code>bioenergetics.model.Model.run</code>
+method will simulate a period of several days (default 30),
+determining the day- and night-time depths which
+optimize the fish's growth during that period.</p></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">class Model:
+    &#34;&#34;&#34;Linked bioenergetics and foraging model
+
+    This class links the Wisconsin bioenergetics model with a visual
+    foraging model to simulate optimal growth for a fish species. As
+    inputs, it requires parameters describing temperature depth
+    profiles, bathymetry, prey abundance, and species-specific
+    bioenergetics parameters. See the documentation for
+    `bioenergetics.model.Model.__init__` for more details.
+
+    Once instantiated, the `bioenergetics.model.Model.run`
+    method will simulate a period of several days (default 30),
+    determining the day- and night-time depths which
+    optimize the fish&#39;s growth during that period.
+
+    &#34;&#34;&#34;
+    def __init__(self, starting_mass, prey_data, temp_fn, bathymetry_fn,
+                 day_hours, light_extinction, params=params.Chinook(),
+                 depth_max=10000, depth_min=-1, day_light=850, night_light=0.1,
+                 surface_elevation=100000):
+        &#34;&#34;&#34;Constructor method
+
+        Args:
+            starting_mass: The starting mass of the fish in grams.
+            prey_data: A `bioenergetics.prey.PreyData` instance.
+            temp_fn: A `bioenergetics.model.InterpolatedFunction`
+                instance representing temperature in degrees C as a function of
+                depth in meters.
+            bathymetry_fn: An instance of
+                `bioenergetics.model.InterpolatedFunction`
+                 representing surface area in meters^2 as a function of
+                elevation in meters.
+            day_hours: A numeric value specifying the day length in hours.
+            light_extinction: The light extinction coefficient.
+            params: An optional `bioenergetics.params.FishParameters` instance
+                containing the parameters for the fish species being modeled.
+                Defaults to an instance of `bioenergetics.params.Chinook`.
+            depth_max: An optional numeric value that caps the maximum
+                simulated depth. If no value is given, this is equal the
+                maximum `domain` value of `temp_fn`
+            depth_min: An optional numeric value that caps the minimum
+                simulated depth. If no value is given, this is equal the
+                minimum `domain` value of `temp_fn`
+            day_light: An optional numeric value specifying the surface light
+                intensity during day time, in lux. Defaults to 850.
+            night_light: An optional numeric value specifying the surface light
+                intensity during night time, in lux. Defaults to 0.1.
+            surface_elevation: An optional numeric value specifying the
+                elevation of the water&#39;s surface in meters. If not given,
+                this is derived from the the `domain` value of `bathymetry_fn`.
+        &#34;&#34;&#34;
+        self.prey_data = prey_data
+        self.light_extinction = light_extinction
+        self.starting_mass = starting_mass
+        self.depth_min = max(depth_min, temp_fn.domain[0])
+        self.depth_max = max(min(depth_max, temp_fn.domain[1]),
+                             self.depth_min+0.2)
+        self.day_hours = day_hours
+        self.depths = []
+        self.surface_elevation = min(surface_elevation,
+                                     bathymetry_fn.domain[1])
+        self.params = params
+
+        self.day_light = day_light
+        self.night_light = night_light
+
+        self.starting_length = params.length_from_weight(self.starting_mass)
+        self.temp_from_depth = temp_fn
+        self.area_from_elevation = bathymetry_fn
+
+    def compute_foragingbydepth(self, length, mass, surface_light, depth):
+        &#34;&#34;&#34;Specific encounter rate for a fish of given size at a given depth.
+
+        Foraging from Beauchamps paper. Current reaction distance is from
+        Gregory and Northcote 1992.
+
+        Args:
+            length: Length of the fish in millimeters.
+            mass: Mass of the fish in grams.
+            surface_light: Intensity of light at the surface in lux.
+            depth: Depth in meters.
+
+        Returns:
+            The specific encounter rate in grams/gram/hour.
+        &#34;&#34;&#34;
+        light = surface_light * np.exp((-self.light_extinction) * depth)
+        depth = depth
+        # prey per cc
+        prey_density = self.prey_data.prey_count(depth) / 1000000
+        lightenergy = light/51.2
+
+        # Note that reaction distance is in cm
+        if lightenergy &lt; 1.045:
+            reactiondistance = 1.1
+        if lightenergy &gt;= 1.045:
+            suspendedsediment = -((np.log10(lightenergy) - 1.045)/(.0108))
+            if suspendedsediment &lt;= 0:
+                reactiondistance = 31.64
+            if suspendedsediment &gt; 0:
+                turbidity = .96*np.log10(suspendedsediment+1) - .002
+                reactiondistance = (31.64-13.31*turbidity)
+            # ~1.1 from this paper, 8 based on kokanee (is ~ the
+            # median observed for this Chinook study)
+            if reactiondistance &lt; 1.1:
+                reactiondistance = 1.1
+        swim_speed = self.params.swim_speed * length/10
+        searchvolume = np.pi * (reactiondistance ** 2) * swim_speed
+        # prey per hour
+        encounter_rate = searchvolume * prey_density * 60 * 60
+
+        # Capping ER based on 2017 Haskell et al.  Haskell equation is
+        # in L, daphnia are currently per cc and was per min, convert
+        # to hr. Haskell may underestimate maximum, note the high
+        # density corresponds to a pt ~48 that is not represented by
+        # the 29.858 cap
+        max_er = (29.858 * (prey_density * 1000) *
+                  ((4.271 + prey_density * 1000) ** (-1)) * 60)
+        if encounter_rate &gt; max_er:
+            encounter_rate = max_er
+
+        # use if want to further restrict capture
+        # encounter_rate = 0.9 * encounter_rate
+        gramsER = encounter_rate * self.prey_data.weight
+        return gramsER / mass
+
+    def compute_ft(self, temperature):
+        &#34;&#34;&#34;Temperature dependence of consumption.
+
+        Args:
+            temperature: Temperature in degrees C.
+
+        Returns:
+            A numeric value representing the temperature-dependent
+            coefficient of consumption.
+        &#34;&#34;&#34;
+        CQ = self.params[&#39;CQ&#39;]
+        CTL = self.params[&#39;CTL&#39;]
+        CTM = self.params[&#39;CTM&#39;]
+        CTO = self.params[&#39;CTO&#39;]
+        CK1 = self.params[&#39;CK1&#39;]
+        CK4 = self.params[&#39;CK4&#39;]
+        eq = self.params[&#39;c_eq&#39;]
+        if eq == 1:
+            return np.exp(CQ * temperature)
+        elif eq == 2:
+            V = (CTM - temperature) / (CTM - CTO)
+            Z = np.log(CQ) * (CTM - CTO)
+            Y = np.log(CQ) * (CTM - CTO + 2)
+            X = (Z ** 2 * (1 + (1 + 40 / Y) ** 0.5) ** 2) / 400
+            return (V ** X) * np.exp(X * (1 - V))
+        elif eq == 3:
+            G1 = (1 / (CTO - CQ)) * np.log((0.98 * (1 - CK1)) / (CK1 * 0.002))
+            G2 = (1 / (CTL - CTM)) * np.log((0.98 * (1 - CK4)) / (CK4 * 0.02))
+            L1 = np.exp(G1 * (temperature - CQ))
+            L2 = np.exp(G2 * (CTL - temperature))
+            K_A = (CK1 * L1) / (1 + CK1 * (L1 - 1))
+            K_B = (CK4 * L2) / (1 + CK4 * (L2 - 1))
+            return K_A * K_B
+        else:
+            raise ValueError(&#34;Unknown consumption equation type: &#34; + eq)
+
+
+    def compute_cmax(self, W):
+        &#34;&#34;&#34;Maximum consumption for a given weight.
+
+        Args:
+            W: mass in grams.
+
+        Returns:
+            Maximum specific feeding rate in grams/gram/day
+        &#34;&#34;&#34;
+        CA = self.params[&#39;CA&#39;]
+        CB = self.params[&#39;CB&#39;]
+        return CA * (W ** CB)
+
+    def compute_waste(self, consumption, P, temperature):
+        &#34;&#34;&#34;Waste losses (egestion and excretion)
+
+        Args:
+            consumption: specific consumption in grams/gram/day.
+            P: feeding level.
+            temperature: temperature in degrees C.
+
+        Returns:
+            A two-element tuple containing specific egestion (fecal waste),
+            and excretion (nitrogenous waste) rates in grams/gram/day.
+        &#34;&#34;&#34;
+        # Units are g/g/d
+        FA = self.params[&#39;FA&#39;]
+        FB = self.params[&#39;FB&#39;]
+        FG = self.params[&#39;FG&#39;]
+        UA = self.params[&#39;UA&#39;]
+        UB = self.params[&#39;UB&#39;]
+        UG = self.params[&#39;UG&#39;]
+        eq = self.params[&#39;egexeq&#39;]
+        if eq == 1:
+            egestion = FA * consumption
+            excretion = UA * (consumption - egestion)
+            return (egestion, excretion)
+        elif eq == 2:
+            egestion = FA * (temperature ** FB) * np.exp(FG * P) * consumption
+            excretion = (UA * (temperature ** UB) * np.exp(UG * P)
+                         * (consumption - egestion))
+            return (egestion, excretion)
+        elif eq == 3:
+            if self.prey_data.indigestibility is None:
+                raise ValueError(&#34;Prey indigestibility not defined&#34;)
+            PFF = self.prey_data.indigestibility
+            PE = FA * (temperature ** FB) * np.exp(FG * P)
+            PF = ((PE - 0.1) / 0.9) * (1 - PFF) + PFF
+            egestion = PF * consumption
+            excretion = (UA * (temperature ** UB) * np.exp(UG * P)
+                         * (consumption - egestion))
+            return (egestion, excretion)
+        else:
+            raise ValueError(&#34;Unknown egestion/excretion equation type: &#34; + eq)
+
+
+    def compute_respiration(self, W, temperature):
+        &#34;&#34;&#34;Respiration losses
+
+        Args:
+            W: mass in grams
+            temperature: temperature in degrees C
+
+        Returns:
+            Specific respiration rate in grams/gram/day
+        &#34;&#34;&#34;
+        RA = self.params[&#39;RA&#39;]
+        RB = self.params[&#39;RB&#39;]
+        RQ = self.params[&#39;RQ&#39;]
+        RTO = self.params[&#39;RTO&#39;]
+        RTM = self.params[&#39;RTM&#39;]
+        RTL = self.params[&#39;RTL&#39;]
+        RK1 = self.params[&#39;RK1&#39;]
+        RK4 = self.params[&#39;RK4&#39;]
+        ACT = self.params[&#39;ACT&#39;]
+        BACT = self.params[&#39;BACT&#39;]
+        eq = self.params[&#39;respeq&#39;]
+        if eq == 1:
+            if temperature &gt; RTL:
+                VEL = RK1 * mass ** RK4
+                print(&#34;SOME OF THE INCLUDED TEMPERATURES ARE LETHAL, &#34;
+                      &#34;PLEASE MODIFY THE TEMPERATURE TO EXCLUDE &#34;
+                      &#34;TEMPERATURES OVER 25C!&#34;)
+            else:
+                VEL = ACT * (W ** RK4) * np.exp(BACT * temperature)
+                FTmetabolism = np.exp(RQ * temperature)
+                activity = np.exp(RTO * VEL)
+        elif eq == 2:
+            Vresp = (RTM - temperature) / (RTM - RTO)
+            Zresp = np.log(RQ) * (RTM - RTO)
+            Yresp = np.log(RQ) * (RTM - RTO + 2)
+            Xresp = (((Zresp ** 2) * (1 + (1 + 40 / Yresp) ** 0.5)) ** 2) / 400
+            FTmetabolism = (Vresp ** Xresp) * np.exp(Xresp * (1 - Vresp))
+            activity = ACT
+        else:
+            raise ValueError(&#34;Unknown respiration equation type: &#34; + eq)
+        return (RA * (W ** RB) * FTmetabolism * activity)
+
+    def energy_density(self, W):
+        &#34;&#34;&#34;Predator energy density as a function of mass.
+
+        Args:
+            W: mass of fish in grams
+
+        Returns:
+            Energy density in joules/gram (wet mass).
+        &#34;&#34;&#34;
+        if self.params[&#39;prededeq&#39;] == 1:
+            return self.energy_density
+        elif self.params[&#39;prededeq&#39;] == 2:
+            if W &lt; self.params[&#39;cutoff&#39;]:
+                alpha = self.params[&#39;AlphaI&#39;]
+                beta = self.params[&#39;BetaI&#39;]
+            else:
+                alpha = self.params[&#39;AlphaII&#39;]
+                beta = self.params[&#39;BetaII&#39;]
+            return alpha + beta*W
+
+    def compute_growth(self, w, egain):
+        &#34;&#34;&#34;Growth as a function of mass and energy gain.
+
+        Args:
+            w: mass in grams
+            egain: energy gain in joules
+
+        Returns:
+            Amount of growth in grams. May be negative.
+        &#34;&#34;&#34;
+        if self.params[&#39;prededeq&#39;] == 1:
+            return w + egain/self.params[&#39;energydensity&#39;]
+        elif self.params[&#39;prededeq&#39;] == 2:
+            if w &lt; self.params[&#39;cutoff&#39;]:
+                alpha = self.params[&#39;AlphaI&#39;]
+                beta = self.params[&#39;BetaI&#39;]
+            elif w &gt;= self.params[&#39;cutoff&#39;]:
+                alpha = self.params[&#39;AlphaII&#39;]
+                beta = self.params[&#39;BetaII&#39;]
+
+            if beta != 0:
+                w_new = ((-alpha +
+                          np.sqrt(alpha**2 +
+                                  4*beta*(egain + w*(alpha+beta*w)))) /
+                         (2*beta))
+            else:
+                w_new = w + egain/alpha
+
+            crossed_cutoff = (w &lt; self.params[&#39;cutoff&#39;] &lt; w_new or
+                              w_new &lt; self.params[&#39;cutoff&#39;] &lt; w)
+            if crossed_cutoff:
+                egain_cutoff = (self.energy_density(self.params[&#39;cutoff&#39;]) -
+                                self.energy_density(w))
+                return (self.compute_growth(self.params[&#39;cutoff&#39;],
+                                            egain_cutoff)
+                        + (self.params[&#39;cutoff&#39;] - w))
+            else:
+                return w_new - w
+
+    def compute_bioenergetics(self, W, temp, P):
+        &#34;&#34;&#34;Compute components of the Wisconsin bioenergetics model.
+
+        Args:
+            W: mass in grams
+            temp: temperature in degrees C
+            P: feeding level
+
+        Returns:
+            A five-element tuple
+            `(consumption, egestion, excretion, respiration, SDAction)`
+        &#34;&#34;&#34;
+        cmax = self.compute_cmax(W)
+        ft = self.compute_ft(temp)
+        consumption = cmax * P * ft
+        (egestion, excretion) = self.compute_waste(consumption, P, temp)
+        respiration = self.compute_respiration(W, temp)
+        SDAction = self.params[&#39;SDA&#39;]*(consumption - egestion)
+        return (consumption, egestion, excretion, respiration, SDAction)
+
+    def best_depth(self, length, mass, x0=None):
+        &#34;&#34;&#34;Solve for optimal day- and night- time depths
+
+        Each day is divided into a day and night period, which entails
+        differing light levels affecting foraging efficiency. For each
+        period, find the depth that maximizes growth given the
+        light-dependent foraging level and metabolic rates derived
+        from the temperature at that depth.
+
+        Args:
+            length: Length in millimeters
+            mass: Mass in grams
+            x0: An optional parameter giving an initial guess for the
+                optimizer. A two-element tuple containing
+                `(day_depth, night_depth)` in meters. If not given, a grid
+                search will first be performed to provide the initial guess.
+
+        Returns:
+            A two-element tuple `(best_depths, best_results)`
+            best_depths: A two element tuple containing the day- and
+                night-time depths which produced the optimal growth.
+            best_results: Growth and bioenergetics rates corresponding
+                to the optimized depths, identical to the output of
+                `bioenergetics.model.Model.growth_fn`.
+
+        &#34;&#34;&#34;
+        day_hours = self.day_hours
+        night_hours = 24.0 - day_hours
+
+        def objective(x):
+            (day_depth,night_depth) = x
+            res = self.growth_fn(day_depth, night_depth, length,
+                                 mass, day_hours, night_hours)
+            return -res[0]
+        depth_bounds = (self.depth_min, self.depth_max)
+        if x0 is None:
+            # find an initial guess via grid search
+            x0 = brute(objective, (depth_bounds, depth_bounds))
+        res = minimize(objective, x0=x0,
+                       method=&#39;L-BFGS-B&#39;,
+                       bounds=[(self.depth_min, self.depth_max),
+                               (self.depth_min, self.depth_max)],
+                       jac=&#39;2-point&#39;, options={&#39;eps&#39;: 1e-3})
+        best_depths = res.x
+        (day_depth, night_depth) = best_depths
+        best_results = self.growth_fn(day_depth, night_depth, length,
+                                      mass, day_hours, night_hours)
+        return best_depths,  best_results
+
+    def growth_fn(self, day_depth, night_depth, length, mass,
+                  day_hours, night_hours):
+        &#34;&#34;&#34;Growth over a 24-hour period.
+
+        This function computes growth for a fish of given size,
+        located at given day- and night-time depths. It is used as an
+        optimization target in the `bioenergetics.model.Model.best_depth`
+        method.
+
+        Args:
+            day_depth: daytime depth in meters
+            night_depth: nighttime depth in meters
+            length: length in millimeters
+            mass: mass in grams
+            day_hours: daytime duration in hours
+            night_hours: nighttime duration in hours
+
+        Returns:
+            A 9-element tuple `(growth, consumption, egestion, excretion,
+            respiration, SDAction, P, day_P, night_P)`
+
+            growth: growth in grams
+            P: feeding level for entire 24-hour period
+            day_P: daytime feeding level
+            night_P: nighttime feeding level
+
+        &#34;&#34;&#34;
+        day_temp = self.temp_from_depth(day_depth)
+        night_temp = self.temp_from_depth(night_depth)
+        cmax = self.compute_cmax(mass)
+        day_foraging = self.compute_foragingbydepth(length, mass,
+                                                    self.day_light,
+                                                    day_depth)
+        night_foraging = self.compute_foragingbydepth(length, mass,
+                                                      self.night_light,
+                                                      night_depth)
+        if day_foraging &gt; night_foraging:
+            day_foraging *= day_hours
+            day_P = min(day_foraging/cmax, 1)
+            night_P = min(1.0 - day_P, night_foraging*night_hours)
+        else:
+            night_foraging *= night_hours
+            night_P = min(night_foraging/cmax, 1.0)
+            day_P = min(1.0 - night_P, day_foraging*day_hours)
+
+        day_bioe = self.compute_bioenergetics(mass, day_temp, day_P)
+        night_bioe = self.compute_bioenergetics(mass, night_temp, night_P)
+        day_bioe = np.array(day_bioe) * day_hours/24.0
+        night_bioe = np.array(night_bioe) * night_hours/24.0
+        (consumption, egestion, excretion, respiration, SDAction) = \
+            day_bioe + night_bioe
+        P = day_P + night_P
+        consumptionjoules = consumption * self.prey_data.energy
+        egain = (consumptionjoules -
+                 ((egestion + excretion + SDAction) * self.prey_data.energy
+                  + respiration * O2CONV))*mass
+        growth = self.compute_growth(mass, egain)
+        return (growth, consumption, egestion, excretion, respiration,
+                SDAction, P, day_P, night_P)
+
+    def sustainability_estimate(self, depth, consumed):
+        &#34;&#34;&#34;Estimate the number of fish which can grow optimally at a given
+        consumption rate, constrained by the prey abundance at the
+        given depth.
+
+        Args:
+            depth: depth in meters
+            consumed: number of individual prey consumed
+
+        Returns:
+            Estimated number of fish which can grow optimally.
+        &#34;&#34;&#34;
+        elevation = self.surface_elevation - depth
+        total_prey = self.prey_data.prey_count(depth)
+        area = self.area_from_elevation(elevation)
+        consumable = (area*total_prey*0.58)
+        pop_est = consumable/(consumed*4)
+        return pop_est
+
+    def run(self, n_days=30):
+        &#34;&#34;&#34;Simulate fish growth over a period of several days.
+
+        Beginning with a fish with a mass equal to
+        `bioenergetics.model.Model.starting_mass`, call
+        `bioenergetics.model.Model.best_depth` for each day, updating
+        the fish&#39;s mass each time.
+
+        Args:
+            n_days: An optional parameter specifying the number of days
+                to simulate. Defaults to 30.
+
+        Returns:
+            A dictionary containing simulation outputs. Each entry is a
+            list with `n_days` elements, corresponding to the values from
+            each day. The output contains the following keys:
+
+            mass: The mass of the fish in grams at the end of each day.
+            length: The length of fish in millimeters at the end of each day.
+            day_depth: The daytime depth of the fish in meters.
+            night_depth: The nighttime depth of the fish in meters.
+            consumption: The specific consumption in grams/gram/day.
+            respiration: The specific respiration in grams/gram/day.
+            egestion: The specific egestion in grams/gram/day.
+            excretion: The specific excretion in grams/gram/day.
+            P: The combined feeding rate for the day.
+            day_P: The daytime feeding rate.
+            night_P: The nighttime feeding rate.
+            day_temperature: The temperature corresponding to `day_depth`.
+            night_temperature: The temperature corresponding to `night_depth`.
+
+        &#34;&#34;&#34;
+        assert (n_days &gt;= 1), &#34;n_days must be a positive integer&#34;
+
+        out = defaultdict(list)
+        condition1 = float(100*self.starting_mass
+                           * ((self.starting_length/10)**(-3.0)))
+        last_best_depths = None
+        length = self.starting_length
+        mass = self.starting_mass
+        for d in range(n_days):
+            best_depths, best_results = self.best_depth(length, mass,
+                                                        last_best_depths)
+            (day_depth, night_depth) = best_depths
+            last_best_depths = best_depths
+            (growth, consumption, egestion, excretion,
+             respiration, SDAction, P, day_P, night_P) = best_results
+            day_temp = self.temp_from_depth(day_depth)
+            night_temp = self.temp_from_depth(night_depth)
+            dailyconsume = (consumption*mass) / self.prey_data.weight
+            mass += growth
+            if growth &gt; 0:
+                length = self.params.length_from_weight(mass)
+            out[&#39;day_depth&#39;].append(day_depth)
+            out[&#39;night_depth&#39;].append(night_depth)
+            out[&#39;growth&#39;].append(growth)
+            out[&#39;Mass&#39;].append(mass)
+            out[&#39;Length&#39;].append(length)
+            out[&#39;egestion&#39;].append(egestion)
+            out[&#39;excretion&#39;].append(excretion)
+            out[&#39;consumption&#39;].append(consumption)
+            out[&#39;P&#39;].append(P)
+            out[&#39;day_temperature&#39;].append(day_temp)
+            out[&#39;night_temperature&#39;].append(night_temp)
+            out[&#39;day_P&#39;].append(day_P)
+            out[&#39;night_P&#39;].append(night_P)
+
+        PopEst = self.sustainability_estimate(day_depth, dailyconsume)
+        condition = float(100*(mass-self.starting_mass)*((length/10)**(-3.0)))
+        return (out, dailyconsume, condition, condition1, PopEst, day_P, night_P)</code></pre>
+</details>
+<h3>Methods</h3>
+<dl>
+<dt id="bioenergetics..model.Model.__init__"><code class="name flex">
+<span>def <span class="ident">__init__</span></span>(<span>self, starting_mass, prey_data, temp_fn, bathymetry_fn, day_hours, light_extinction, params=&lt;bioenergetics.params.Chinook object at 0x7f38334edc18&gt;, depth_max=10000, depth_min=-1, day_light=850, night_light=0.1, surface_elevation=100000)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Constructor method</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>starting_mass</code></strong></dt>
+<dd>The starting mass of the fish in grams.</dd>
+<dt><strong><code>prey_data</code></strong></dt>
+<dd>A <code>bioenergetics.prey.PreyData</code> instance.</dd>
+<dt><strong><code>temp_fn</code></strong></dt>
+<dd>A <code>bioenergetics.model.InterpolatedFunction</code>
+instance representing temperature in degrees C as a function of
+depth in meters.</dd>
+<dt><strong><code>bathymetry_fn</code></strong></dt>
+<dd>An instance of
+<code>bioenergetics.model.InterpolatedFunction</code>
+representing surface area in meters^2 as a function of
+elevation in meters.</dd>
+<dt><strong><code>day_hours</code></strong></dt>
+<dd>A numeric value specifying the day length in hours.</dd>
+<dt><strong><code>light_extinction</code></strong></dt>
+<dd>The light extinction coefficient.</dd>
+<dt><strong><code>params</code></strong></dt>
+<dd>An optional <code>bioenergetics.params.FishParameters</code> instance
+containing the parameters for the fish species being modeled.
+Defaults to an instance of <code>bioenergetics.params.Chinook</code>.</dd>
+<dt><strong><code>depth_max</code></strong></dt>
+<dd>An optional numeric value that caps the maximum
+simulated depth. If no value is given, this is equal the
+maximum <code>domain</code> value of <code>temp_fn</code></dd>
+<dt><strong><code>depth_min</code></strong></dt>
+<dd>An optional numeric value that caps the minimum
+simulated depth. If no value is given, this is equal the
+minimum <code>domain</code> value of <code>temp_fn</code></dd>
+<dt><strong><code>day_light</code></strong></dt>
+<dd>An optional numeric value specifying the surface light
+intensity during day time, in lux. Defaults to 850.</dd>
+<dt><strong><code>night_light</code></strong></dt>
+<dd>An optional numeric value specifying the surface light
+intensity during night time, in lux. Defaults to 0.1.</dd>
+<dt><strong><code>surface_elevation</code></strong></dt>
+<dd>An optional numeric value specifying the
+elevation of the water's surface in meters. If not given,
+this is derived from the the <code>domain</code> value of <code>bathymetry_fn</code>.</dd>
+</dl></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">def __init__(self, starting_mass, prey_data, temp_fn, bathymetry_fn,
+             day_hours, light_extinction, params=params.Chinook(),
+             depth_max=10000, depth_min=-1, day_light=850, night_light=0.1,
+             surface_elevation=100000):
+    &#34;&#34;&#34;Constructor method
+
+    Args:
+        starting_mass: The starting mass of the fish in grams.
+        prey_data: A `bioenergetics.prey.PreyData` instance.
+        temp_fn: A `bioenergetics.model.InterpolatedFunction`
+            instance representing temperature in degrees C as a function of
+            depth in meters.
+        bathymetry_fn: An instance of
+            `bioenergetics.model.InterpolatedFunction`
+             representing surface area in meters^2 as a function of
+            elevation in meters.
+        day_hours: A numeric value specifying the day length in hours.
+        light_extinction: The light extinction coefficient.
+        params: An optional `bioenergetics.params.FishParameters` instance
+            containing the parameters for the fish species being modeled.
+            Defaults to an instance of `bioenergetics.params.Chinook`.
+        depth_max: An optional numeric value that caps the maximum
+            simulated depth. If no value is given, this is equal the
+            maximum `domain` value of `temp_fn`
+        depth_min: An optional numeric value that caps the minimum
+            simulated depth. If no value is given, this is equal the
+            minimum `domain` value of `temp_fn`
+        day_light: An optional numeric value specifying the surface light
+            intensity during day time, in lux. Defaults to 850.
+        night_light: An optional numeric value specifying the surface light
+            intensity during night time, in lux. Defaults to 0.1.
+        surface_elevation: An optional numeric value specifying the
+            elevation of the water&#39;s surface in meters. If not given,
+            this is derived from the the `domain` value of `bathymetry_fn`.
+    &#34;&#34;&#34;
+    self.prey_data = prey_data
+    self.light_extinction = light_extinction
+    self.starting_mass = starting_mass
+    self.depth_min = max(depth_min, temp_fn.domain[0])
+    self.depth_max = max(min(depth_max, temp_fn.domain[1]),
+                         self.depth_min+0.2)
+    self.day_hours = day_hours
+    self.depths = []
+    self.surface_elevation = min(surface_elevation,
+                                 bathymetry_fn.domain[1])
+    self.params = params
+
+    self.day_light = day_light
+    self.night_light = night_light
+
+    self.starting_length = params.length_from_weight(self.starting_mass)
+    self.temp_from_depth = temp_fn
+    self.area_from_elevation = bathymetry_fn</code></pre>
+</details>
+</dd>
+<dt id="bioenergetics..model.Model.best_depth"><code class="name flex">
+<span>def <span class="ident">best_depth</span></span>(<span>self, length, mass, x0=None)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Solve for optimal day- and night- time depths</p>
+<p>Each day is divided into a day and night period, which entails
+differing light levels affecting foraging efficiency. For each
+period, find the depth that maximizes growth given the
+light-dependent foraging level and metabolic rates derived
+from the temperature at that depth.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>length</code></strong></dt>
+<dd>Length in millimeters</dd>
+<dt><strong><code>mass</code></strong></dt>
+<dd>Mass in grams</dd>
+<dt><strong><code>x0</code></strong></dt>
+<dd>An optional parameter giving an initial guess for the
+optimizer. A two-element tuple containing
+<code>(day_depth, night_depth)</code> in meters. If not given, a grid
+search will first be performed to provide the initial guess.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt>A two-element tuple <code>(best_depths, best_results)</code></dt>
+<dt><strong><code>best_depths</code></strong></dt>
+<dd>A two element tuple containing the day- and
+night-time depths which produced the optimal growth.</dd>
+<dt><strong><code>best_results</code></strong></dt>
+<dd>Growth and bioenergetics rates corresponding
+to the optimized depths, identical to the output of
+<code>bioenergetics.model.Model.growth_fn</code>.</dd>
+</dl></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">def best_depth(self, length, mass, x0=None):
+    &#34;&#34;&#34;Solve for optimal day- and night- time depths
+
+    Each day is divided into a day and night period, which entails
+    differing light levels affecting foraging efficiency. For each
+    period, find the depth that maximizes growth given the
+    light-dependent foraging level and metabolic rates derived
+    from the temperature at that depth.
+
+    Args:
+        length: Length in millimeters
+        mass: Mass in grams
+        x0: An optional parameter giving an initial guess for the
+            optimizer. A two-element tuple containing
+            `(day_depth, night_depth)` in meters. If not given, a grid
+            search will first be performed to provide the initial guess.
+
+    Returns:
+        A two-element tuple `(best_depths, best_results)`
+        best_depths: A two element tuple containing the day- and
+            night-time depths which produced the optimal growth.
+        best_results: Growth and bioenergetics rates corresponding
+            to the optimized depths, identical to the output of
+            `bioenergetics.model.Model.growth_fn`.
+
+    &#34;&#34;&#34;
+    day_hours = self.day_hours
+    night_hours = 24.0 - day_hours
+
+    def objective(x):
+        (day_depth,night_depth) = x
+        res = self.growth_fn(day_depth, night_depth, length,
+                             mass, day_hours, night_hours)
+        return -res[0]
+    depth_bounds = (self.depth_min, self.depth_max)
+    if x0 is None:
+        # find an initial guess via grid search
+        x0 = brute(objective, (depth_bounds, depth_bounds))
+    res = minimize(objective, x0=x0,
+                   method=&#39;L-BFGS-B&#39;,
+                   bounds=[(self.depth_min, self.depth_max),
+                           (self.depth_min, self.depth_max)],
+                   jac=&#39;2-point&#39;, options={&#39;eps&#39;: 1e-3})
+    best_depths = res.x
+    (day_depth, night_depth) = best_depths
+    best_results = self.growth_fn(day_depth, night_depth, length,
+                                  mass, day_hours, night_hours)
+    return best_depths,  best_results</code></pre>
+</details>
+</dd>
+<dt id="bioenergetics..model.Model.compute_bioenergetics"><code class="name flex">
+<span>def <span class="ident">compute_bioenergetics</span></span>(<span>self, W, temp, P)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Compute components of the Wisconsin bioenergetics model.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>W</code></strong></dt>
+<dd>mass in grams</dd>
+<dt><strong><code>temp</code></strong></dt>
+<dd>temperature in degrees C</dd>
+<dt><strong><code>P</code></strong></dt>
+<dd>feeding level</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<p>A five-element tuple
+<code>(consumption, egestion, excretion, respiration, SDAction)</code></p></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">def compute_bioenergetics(self, W, temp, P):
+    &#34;&#34;&#34;Compute components of the Wisconsin bioenergetics model.
+
+    Args:
+        W: mass in grams
+        temp: temperature in degrees C
+        P: feeding level
+
+    Returns:
+        A five-element tuple
+        `(consumption, egestion, excretion, respiration, SDAction)`
+    &#34;&#34;&#34;
+    cmax = self.compute_cmax(W)
+    ft = self.compute_ft(temp)
+    consumption = cmax * P * ft
+    (egestion, excretion) = self.compute_waste(consumption, P, temp)
+    respiration = self.compute_respiration(W, temp)
+    SDAction = self.params[&#39;SDA&#39;]*(consumption - egestion)
+    return (consumption, egestion, excretion, respiration, SDAction)</code></pre>
+</details>
+</dd>
+<dt id="bioenergetics..model.Model.compute_cmax"><code class="name flex">
+<span>def <span class="ident">compute_cmax</span></span>(<span>self, W)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Maximum consumption for a given weight.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>W</code></strong></dt>
+<dd>mass in grams.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<p>Maximum specific feeding rate in grams/gram/day</p></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">def compute_cmax(self, W):
+    &#34;&#34;&#34;Maximum consumption for a given weight.
+
+    Args:
+        W: mass in grams.
+
+    Returns:
+        Maximum specific feeding rate in grams/gram/day
+    &#34;&#34;&#34;
+    CA = self.params[&#39;CA&#39;]
+    CB = self.params[&#39;CB&#39;]
+    return CA * (W ** CB)</code></pre>
+</details>
+</dd>
+<dt id="bioenergetics..model.Model.compute_foragingbydepth"><code class="name flex">
+<span>def <span class="ident">compute_foragingbydepth</span></span>(<span>self, length, mass, surface_light, depth)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Specific encounter rate for a fish of given size at a given depth.</p>
+<p>Foraging from Beauchamps paper. Current reaction distance is from
+Gregory and Northcote 1992.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>length</code></strong></dt>
+<dd>Length of the fish in millimeters.</dd>
+<dt><strong><code>mass</code></strong></dt>
+<dd>Mass of the fish in grams.</dd>
+<dt><strong><code>surface_light</code></strong></dt>
+<dd>Intensity of light at the surface in lux.</dd>
+<dt><strong><code>depth</code></strong></dt>
+<dd>Depth in meters.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<p>The specific encounter rate in grams/gram/hour.</p></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">def compute_foragingbydepth(self, length, mass, surface_light, depth):
+    &#34;&#34;&#34;Specific encounter rate for a fish of given size at a given depth.
+
+    Foraging from Beauchamps paper. Current reaction distance is from
+    Gregory and Northcote 1992.
+
+    Args:
+        length: Length of the fish in millimeters.
+        mass: Mass of the fish in grams.
+        surface_light: Intensity of light at the surface in lux.
+        depth: Depth in meters.
+
+    Returns:
+        The specific encounter rate in grams/gram/hour.
+    &#34;&#34;&#34;
+    light = surface_light * np.exp((-self.light_extinction) * depth)
+    depth = depth
+    # prey per cc
+    prey_density = self.prey_data.prey_count(depth) / 1000000
+    lightenergy = light/51.2
+
+    # Note that reaction distance is in cm
+    if lightenergy &lt; 1.045:
+        reactiondistance = 1.1
+    if lightenergy &gt;= 1.045:
+        suspendedsediment = -((np.log10(lightenergy) - 1.045)/(.0108))
+        if suspendedsediment &lt;= 0:
+            reactiondistance = 31.64
+        if suspendedsediment &gt; 0:
+            turbidity = .96*np.log10(suspendedsediment+1) - .002
+            reactiondistance = (31.64-13.31*turbidity)
+        # ~1.1 from this paper, 8 based on kokanee (is ~ the
+        # median observed for this Chinook study)
+        if reactiondistance &lt; 1.1:
+            reactiondistance = 1.1
+    swim_speed = self.params.swim_speed * length/10
+    searchvolume = np.pi * (reactiondistance ** 2) * swim_speed
+    # prey per hour
+    encounter_rate = searchvolume * prey_density * 60 * 60
+
+    # Capping ER based on 2017 Haskell et al.  Haskell equation is
+    # in L, daphnia are currently per cc and was per min, convert
+    # to hr. Haskell may underestimate maximum, note the high
+    # density corresponds to a pt ~48 that is not represented by
+    # the 29.858 cap
+    max_er = (29.858 * (prey_density * 1000) *
+              ((4.271 + prey_density * 1000) ** (-1)) * 60)
+    if encounter_rate &gt; max_er:
+        encounter_rate = max_er
+
+    # use if want to further restrict capture
+    # encounter_rate = 0.9 * encounter_rate
+    gramsER = encounter_rate * self.prey_data.weight
+    return gramsER / mass</code></pre>
+</details>
+</dd>
+<dt id="bioenergetics..model.Model.compute_ft"><code class="name flex">
+<span>def <span class="ident">compute_ft</span></span>(<span>self, temperature)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Temperature dependence of consumption.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>temperature</code></strong></dt>
+<dd>Temperature in degrees C.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<p>A numeric value representing the temperature-dependent
+coefficient of consumption.</p></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">def compute_ft(self, temperature):
+    &#34;&#34;&#34;Temperature dependence of consumption.
+
+    Args:
+        temperature: Temperature in degrees C.
+
+    Returns:
+        A numeric value representing the temperature-dependent
+        coefficient of consumption.
+    &#34;&#34;&#34;
+    CQ = self.params[&#39;CQ&#39;]
+    CTL = self.params[&#39;CTL&#39;]
+    CTM = self.params[&#39;CTM&#39;]
+    CTO = self.params[&#39;CTO&#39;]
+    CK1 = self.params[&#39;CK1&#39;]
+    CK4 = self.params[&#39;CK4&#39;]
+    eq = self.params[&#39;c_eq&#39;]
+    if eq == 1:
+        return np.exp(CQ * temperature)
+    elif eq == 2:
+        V = (CTM - temperature) / (CTM - CTO)
+        Z = np.log(CQ) * (CTM - CTO)
+        Y = np.log(CQ) * (CTM - CTO + 2)
+        X = (Z ** 2 * (1 + (1 + 40 / Y) ** 0.5) ** 2) / 400
+        return (V ** X) * np.exp(X * (1 - V))
+    elif eq == 3:
+        G1 = (1 / (CTO - CQ)) * np.log((0.98 * (1 - CK1)) / (CK1 * 0.002))
+        G2 = (1 / (CTL - CTM)) * np.log((0.98 * (1 - CK4)) / (CK4 * 0.02))
+        L1 = np.exp(G1 * (temperature - CQ))
+        L2 = np.exp(G2 * (CTL - temperature))
+        K_A = (CK1 * L1) / (1 + CK1 * (L1 - 1))
+        K_B = (CK4 * L2) / (1 + CK4 * (L2 - 1))
+        return K_A * K_B
+    else:
+        raise ValueError(&#34;Unknown consumption equation type: &#34; + eq)</code></pre>
+</details>
+</dd>
+<dt id="bioenergetics..model.Model.compute_growth"><code class="name flex">
+<span>def <span class="ident">compute_growth</span></span>(<span>self, w, egain)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Growth as a function of mass and energy gain.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>w</code></strong></dt>
+<dd>mass in grams</dd>
+<dt><strong><code>egain</code></strong></dt>
+<dd>energy gain in joules</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<p>Amount of growth in grams. May be negative.</p></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">def compute_growth(self, w, egain):
+    &#34;&#34;&#34;Growth as a function of mass and energy gain.
+
+    Args:
+        w: mass in grams
+        egain: energy gain in joules
+
+    Returns:
+        Amount of growth in grams. May be negative.
+    &#34;&#34;&#34;
+    if self.params[&#39;prededeq&#39;] == 1:
+        return w + egain/self.params[&#39;energydensity&#39;]
+    elif self.params[&#39;prededeq&#39;] == 2:
+        if w &lt; self.params[&#39;cutoff&#39;]:
+            alpha = self.params[&#39;AlphaI&#39;]
+            beta = self.params[&#39;BetaI&#39;]
+        elif w &gt;= self.params[&#39;cutoff&#39;]:
+            alpha = self.params[&#39;AlphaII&#39;]
+            beta = self.params[&#39;BetaII&#39;]
+
+        if beta != 0:
+            w_new = ((-alpha +
+                      np.sqrt(alpha**2 +
+                              4*beta*(egain + w*(alpha+beta*w)))) /
+                     (2*beta))
+        else:
+            w_new = w + egain/alpha
+
+        crossed_cutoff = (w &lt; self.params[&#39;cutoff&#39;] &lt; w_new or
+                          w_new &lt; self.params[&#39;cutoff&#39;] &lt; w)
+        if crossed_cutoff:
+            egain_cutoff = (self.energy_density(self.params[&#39;cutoff&#39;]) -
+                            self.energy_density(w))
+            return (self.compute_growth(self.params[&#39;cutoff&#39;],
+                                        egain_cutoff)
+                    + (self.params[&#39;cutoff&#39;] - w))
+        else:
+            return w_new - w</code></pre>
+</details>
+</dd>
+<dt id="bioenergetics..model.Model.compute_respiration"><code class="name flex">
+<span>def <span class="ident">compute_respiration</span></span>(<span>self, W, temperature)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Respiration losses</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>W</code></strong></dt>
+<dd>mass in grams</dd>
+<dt><strong><code>temperature</code></strong></dt>
+<dd>temperature in degrees C</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<p>Specific respiration rate in grams/gram/day</p></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">def compute_respiration(self, W, temperature):
+    &#34;&#34;&#34;Respiration losses
+
+    Args:
+        W: mass in grams
+        temperature: temperature in degrees C
+
+    Returns:
+        Specific respiration rate in grams/gram/day
+    &#34;&#34;&#34;
+    RA = self.params[&#39;RA&#39;]
+    RB = self.params[&#39;RB&#39;]
+    RQ = self.params[&#39;RQ&#39;]
+    RTO = self.params[&#39;RTO&#39;]
+    RTM = self.params[&#39;RTM&#39;]
+    RTL = self.params[&#39;RTL&#39;]
+    RK1 = self.params[&#39;RK1&#39;]
+    RK4 = self.params[&#39;RK4&#39;]
+    ACT = self.params[&#39;ACT&#39;]
+    BACT = self.params[&#39;BACT&#39;]
+    eq = self.params[&#39;respeq&#39;]
+    if eq == 1:
+        if temperature &gt; RTL:
+            VEL = RK1 * mass ** RK4
+            print(&#34;SOME OF THE INCLUDED TEMPERATURES ARE LETHAL, &#34;
+                  &#34;PLEASE MODIFY THE TEMPERATURE TO EXCLUDE &#34;
+                  &#34;TEMPERATURES OVER 25C!&#34;)
+        else:
+            VEL = ACT * (W ** RK4) * np.exp(BACT * temperature)
+            FTmetabolism = np.exp(RQ * temperature)
+            activity = np.exp(RTO * VEL)
+    elif eq == 2:
+        Vresp = (RTM - temperature) / (RTM - RTO)
+        Zresp = np.log(RQ) * (RTM - RTO)
+        Yresp = np.log(RQ) * (RTM - RTO + 2)
+        Xresp = (((Zresp ** 2) * (1 + (1 + 40 / Yresp) ** 0.5)) ** 2) / 400
+        FTmetabolism = (Vresp ** Xresp) * np.exp(Xresp * (1 - Vresp))
+        activity = ACT
+    else:
+        raise ValueError(&#34;Unknown respiration equation type: &#34; + eq)
+    return (RA * (W ** RB) * FTmetabolism * activity)</code></pre>
+</details>
+</dd>
+<dt id="bioenergetics..model.Model.compute_waste"><code class="name flex">
+<span>def <span class="ident">compute_waste</span></span>(<span>self, consumption, P, temperature)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Waste losses (egestion and excretion)</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>consumption</code></strong></dt>
+<dd>specific consumption in grams/gram/day.</dd>
+<dt><strong><code>P</code></strong></dt>
+<dd>feeding level.</dd>
+<dt><strong><code>temperature</code></strong></dt>
+<dd>temperature in degrees C.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<p>A two-element tuple containing specific egestion (fecal waste),
+and excretion (nitrogenous waste) rates in grams/gram/day.</p></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">def compute_waste(self, consumption, P, temperature):
+    &#34;&#34;&#34;Waste losses (egestion and excretion)
+
+    Args:
+        consumption: specific consumption in grams/gram/day.
+        P: feeding level.
+        temperature: temperature in degrees C.
+
+    Returns:
+        A two-element tuple containing specific egestion (fecal waste),
+        and excretion (nitrogenous waste) rates in grams/gram/day.
+    &#34;&#34;&#34;
+    # Units are g/g/d
+    FA = self.params[&#39;FA&#39;]
+    FB = self.params[&#39;FB&#39;]
+    FG = self.params[&#39;FG&#39;]
+    UA = self.params[&#39;UA&#39;]
+    UB = self.params[&#39;UB&#39;]
+    UG = self.params[&#39;UG&#39;]
+    eq = self.params[&#39;egexeq&#39;]
+    if eq == 1:
+        egestion = FA * consumption
+        excretion = UA * (consumption - egestion)
+        return (egestion, excretion)
+    elif eq == 2:
+        egestion = FA * (temperature ** FB) * np.exp(FG * P) * consumption
+        excretion = (UA * (temperature ** UB) * np.exp(UG * P)
+                     * (consumption - egestion))
+        return (egestion, excretion)
+    elif eq == 3:
+        if self.prey_data.indigestibility is None:
+            raise ValueError(&#34;Prey indigestibility not defined&#34;)
+        PFF = self.prey_data.indigestibility
+        PE = FA * (temperature ** FB) * np.exp(FG * P)
+        PF = ((PE - 0.1) / 0.9) * (1 - PFF) + PFF
+        egestion = PF * consumption
+        excretion = (UA * (temperature ** UB) * np.exp(UG * P)
+                     * (consumption - egestion))
+        return (egestion, excretion)
+    else:
+        raise ValueError(&#34;Unknown egestion/excretion equation type: &#34; + eq)</code></pre>
+</details>
+</dd>
+<dt id="bioenergetics..model.Model.energy_density"><code class="name flex">
+<span>def <span class="ident">energy_density</span></span>(<span>self, W)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Predator energy density as a function of mass.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>W</code></strong></dt>
+<dd>mass of fish in grams</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<p>Energy density in joules/gram (wet mass).</p></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">def energy_density(self, W):
+    &#34;&#34;&#34;Predator energy density as a function of mass.
+
+    Args:
+        W: mass of fish in grams
+
+    Returns:
+        Energy density in joules/gram (wet mass).
+    &#34;&#34;&#34;
+    if self.params[&#39;prededeq&#39;] == 1:
+        return self.energy_density
+    elif self.params[&#39;prededeq&#39;] == 2:
+        if W &lt; self.params[&#39;cutoff&#39;]:
+            alpha = self.params[&#39;AlphaI&#39;]
+            beta = self.params[&#39;BetaI&#39;]
+        else:
+            alpha = self.params[&#39;AlphaII&#39;]
+            beta = self.params[&#39;BetaII&#39;]
+        return alpha + beta*W</code></pre>
+</details>
+</dd>
+<dt id="bioenergetics..model.Model.growth_fn"><code class="name flex">
+<span>def <span class="ident">growth_fn</span></span>(<span>self, day_depth, night_depth, length, mass, day_hours, night_hours)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Growth over a 24-hour period.</p>
+<p>This function computes growth for a fish of given size,
+located at given day- and night-time depths. It is used as an
+optimization target in the <code>bioenergetics.model.Model.best_depth</code>
+method.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>day_depth</code></strong></dt>
+<dd>daytime depth in meters</dd>
+<dt><strong><code>night_depth</code></strong></dt>
+<dd>nighttime depth in meters</dd>
+<dt><strong><code>length</code></strong></dt>
+<dd>length in millimeters</dd>
+<dt><strong><code>mass</code></strong></dt>
+<dd>mass in grams</dd>
+<dt><strong><code>day_hours</code></strong></dt>
+<dd>daytime duration in hours</dd>
+<dt><strong><code>night_hours</code></strong></dt>
+<dd>nighttime duration in hours</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<p>A 9-element tuple <code>(growth, consumption, egestion, excretion,
+respiration, SDAction, P, day_P, night_P)</code></p>
+<dl>
+<dt><strong><code>growth</code></strong></dt>
+<dd>growth in grams</dd>
+<dt><strong><code>P</code></strong></dt>
+<dd>feeding level for entire 24-hour period</dd>
+<dt><strong><code>day_P</code></strong></dt>
+<dd>daytime feeding level</dd>
+<dt><strong><code>night_P</code></strong></dt>
+<dd>nighttime feeding level</dd>
+</dl></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">def growth_fn(self, day_depth, night_depth, length, mass,
+              day_hours, night_hours):
+    &#34;&#34;&#34;Growth over a 24-hour period.
+
+    This function computes growth for a fish of given size,
+    located at given day- and night-time depths. It is used as an
+    optimization target in the `bioenergetics.model.Model.best_depth`
+    method.
+
+    Args:
+        day_depth: daytime depth in meters
+        night_depth: nighttime depth in meters
+        length: length in millimeters
+        mass: mass in grams
+        day_hours: daytime duration in hours
+        night_hours: nighttime duration in hours
+
+    Returns:
+        A 9-element tuple `(growth, consumption, egestion, excretion,
+        respiration, SDAction, P, day_P, night_P)`
+
+        growth: growth in grams
+        P: feeding level for entire 24-hour period
+        day_P: daytime feeding level
+        night_P: nighttime feeding level
+
+    &#34;&#34;&#34;
+    day_temp = self.temp_from_depth(day_depth)
+    night_temp = self.temp_from_depth(night_depth)
+    cmax = self.compute_cmax(mass)
+    day_foraging = self.compute_foragingbydepth(length, mass,
+                                                self.day_light,
+                                                day_depth)
+    night_foraging = self.compute_foragingbydepth(length, mass,
+                                                  self.night_light,
+                                                  night_depth)
+    if day_foraging &gt; night_foraging:
+        day_foraging *= day_hours
+        day_P = min(day_foraging/cmax, 1)
+        night_P = min(1.0 - day_P, night_foraging*night_hours)
+    else:
+        night_foraging *= night_hours
+        night_P = min(night_foraging/cmax, 1.0)
+        day_P = min(1.0 - night_P, day_foraging*day_hours)
+
+    day_bioe = self.compute_bioenergetics(mass, day_temp, day_P)
+    night_bioe = self.compute_bioenergetics(mass, night_temp, night_P)
+    day_bioe = np.array(day_bioe) * day_hours/24.0
+    night_bioe = np.array(night_bioe) * night_hours/24.0
+    (consumption, egestion, excretion, respiration, SDAction) = \
+        day_bioe + night_bioe
+    P = day_P + night_P
+    consumptionjoules = consumption * self.prey_data.energy
+    egain = (consumptionjoules -
+             ((egestion + excretion + SDAction) * self.prey_data.energy
+              + respiration * O2CONV))*mass
+    growth = self.compute_growth(mass, egain)
+    return (growth, consumption, egestion, excretion, respiration,
+            SDAction, P, day_P, night_P)</code></pre>
+</details>
+</dd>
+<dt id="bioenergetics..model.Model.run"><code class="name flex">
+<span>def <span class="ident">run</span></span>(<span>self, n_days=30)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Simulate fish growth over a period of several days.</p>
+<p>Beginning with a fish with a mass equal to
+<code>bioenergetics.model.Model.starting_mass</code>, call
+<code>bioenergetics.model.Model.best_depth</code> for each day, updating
+the fish's mass each time.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>n_days</code></strong></dt>
+<dd>An optional parameter specifying the number of days
+to simulate. Defaults to 30.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<p>A dictionary containing simulation outputs. Each entry is a
+list with <code>n_days</code> elements, corresponding to the values from
+each day. The output contains the following keys:</p>
+<dl>
+<dt><strong><code>mass</code></strong></dt>
+<dd>The mass of the fish in grams at the end of each day.</dd>
+<dt><strong><code>length</code></strong></dt>
+<dd>The length of fish in millimeters at the end of each day.</dd>
+<dt><strong><code>day_depth</code></strong></dt>
+<dd>The daytime depth of the fish in meters.</dd>
+<dt><strong><code>night_depth</code></strong></dt>
+<dd>The nighttime depth of the fish in meters.</dd>
+<dt><strong><code>consumption</code></strong></dt>
+<dd>The specific consumption in grams/gram/day.</dd>
+<dt><strong><code>respiration</code></strong></dt>
+<dd>The specific respiration in grams/gram/day.</dd>
+<dt><strong><code>egestion</code></strong></dt>
+<dd>The specific egestion in grams/gram/day.</dd>
+<dt><strong><code>excretion</code></strong></dt>
+<dd>The specific excretion in grams/gram/day.</dd>
+<dt><strong><code>P</code></strong></dt>
+<dd>The combined feeding rate for the day.</dd>
+<dt><strong><code>day_P</code></strong></dt>
+<dd>The daytime feeding rate.</dd>
+<dt><strong><code>night_P</code></strong></dt>
+<dd>The nighttime feeding rate.</dd>
+<dt><strong><code>day_temperature</code></strong></dt>
+<dd>The temperature corresponding to <code>day_depth</code>.</dd>
+<dt><strong><code>night_temperature</code></strong></dt>
+<dd>The temperature corresponding to <code>night_depth</code>.</dd>
+</dl></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">def run(self, n_days=30):
+    &#34;&#34;&#34;Simulate fish growth over a period of several days.
+
+    Beginning with a fish with a mass equal to
+    `bioenergetics.model.Model.starting_mass`, call
+    `bioenergetics.model.Model.best_depth` for each day, updating
+    the fish&#39;s mass each time.
+
+    Args:
+        n_days: An optional parameter specifying the number of days
+            to simulate. Defaults to 30.
+
+    Returns:
+        A dictionary containing simulation outputs. Each entry is a
+        list with `n_days` elements, corresponding to the values from
+        each day. The output contains the following keys:
+
+        mass: The mass of the fish in grams at the end of each day.
+        length: The length of fish in millimeters at the end of each day.
+        day_depth: The daytime depth of the fish in meters.
+        night_depth: The nighttime depth of the fish in meters.
+        consumption: The specific consumption in grams/gram/day.
+        respiration: The specific respiration in grams/gram/day.
+        egestion: The specific egestion in grams/gram/day.
+        excretion: The specific excretion in grams/gram/day.
+        P: The combined feeding rate for the day.
+        day_P: The daytime feeding rate.
+        night_P: The nighttime feeding rate.
+        day_temperature: The temperature corresponding to `day_depth`.
+        night_temperature: The temperature corresponding to `night_depth`.
+
+    &#34;&#34;&#34;
+    assert (n_days &gt;= 1), &#34;n_days must be a positive integer&#34;
+
+    out = defaultdict(list)
+    condition1 = float(100*self.starting_mass
+                       * ((self.starting_length/10)**(-3.0)))
+    last_best_depths = None
+    length = self.starting_length
+    mass = self.starting_mass
+    for d in range(n_days):
+        best_depths, best_results = self.best_depth(length, mass,
+                                                    last_best_depths)
+        (day_depth, night_depth) = best_depths
+        last_best_depths = best_depths
+        (growth, consumption, egestion, excretion,
+         respiration, SDAction, P, day_P, night_P) = best_results
+        day_temp = self.temp_from_depth(day_depth)
+        night_temp = self.temp_from_depth(night_depth)
+        dailyconsume = (consumption*mass) / self.prey_data.weight
+        mass += growth
+        if growth &gt; 0:
+            length = self.params.length_from_weight(mass)
+        out[&#39;day_depth&#39;].append(day_depth)
+        out[&#39;night_depth&#39;].append(night_depth)
+        out[&#39;growth&#39;].append(growth)
+        out[&#39;Mass&#39;].append(mass)
+        out[&#39;Length&#39;].append(length)
+        out[&#39;egestion&#39;].append(egestion)
+        out[&#39;excretion&#39;].append(excretion)
+        out[&#39;consumption&#39;].append(consumption)
+        out[&#39;P&#39;].append(P)
+        out[&#39;day_temperature&#39;].append(day_temp)
+        out[&#39;night_temperature&#39;].append(night_temp)
+        out[&#39;day_P&#39;].append(day_P)
+        out[&#39;night_P&#39;].append(night_P)
+
+    PopEst = self.sustainability_estimate(day_depth, dailyconsume)
+    condition = float(100*(mass-self.starting_mass)*((length/10)**(-3.0)))
+    return (out, dailyconsume, condition, condition1, PopEst, day_P, night_P)</code></pre>
+</details>
+</dd>
+<dt id="bioenergetics..model.Model.sustainability_estimate"><code class="name flex">
+<span>def <span class="ident">sustainability_estimate</span></span>(<span>self, depth, consumed)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Estimate the number of fish which can grow optimally at a given
+consumption rate, constrained by the prey abundance at the
+given depth.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>depth</code></strong></dt>
+<dd>depth in meters</dd>
+<dt><strong><code>consumed</code></strong></dt>
+<dd>number of individual prey consumed</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<p>Estimated number of fish which can grow optimally.</p></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">def sustainability_estimate(self, depth, consumed):
+    &#34;&#34;&#34;Estimate the number of fish which can grow optimally at a given
+    consumption rate, constrained by the prey abundance at the
+    given depth.
+
+    Args:
+        depth: depth in meters
+        consumed: number of individual prey consumed
+
+    Returns:
+        Estimated number of fish which can grow optimally.
+    &#34;&#34;&#34;
+    elevation = self.surface_elevation - depth
+    total_prey = self.prey_data.prey_count(depth)
+    area = self.area_from_elevation(elevation)
+    consumable = (area*total_prey*0.58)
+    pop_est = consumable/(consumed*4)
+    return pop_est</code></pre>
+</details>
+</dd>
+</dl>
+</dd>
+</dl>
+</section>
+</article>
+<nav id="sidebar">
+<h1>Index</h1>
+<div class="toc">
+<ul></ul>
+</div>
+<ul id="index">
+<li><h3>Super-module</h3>
+<ul>
+<li><code><a title="bioenergetics." href="index.html">bioenergetics.</a></code></li>
+</ul>
+</li>
+<li><h3><a href="#header-variables">Global variables</a></h3>
+<ul class="">
+<li><code><a title="bioenergetics..model.O2CONV" href="#bioenergetics..model.O2CONV">O2CONV</a></code></li>
+</ul>
+</li>
+<li><h3><a href="#header-classes">Classes</a></h3>
+<ul>
+<li>
+<h4><code><a title="bioenergetics..model.InterpolatedFunction" href="#bioenergetics..model.InterpolatedFunction">InterpolatedFunction</a></code></h4>
+<ul class="">
+<li><code><a title="bioenergetics..model.InterpolatedFunction.__init__" href="#bioenergetics..model.InterpolatedFunction.__init__">__init__</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="bioenergetics..model.Model" href="#bioenergetics..model.Model">Model</a></code></h4>
+<ul class="">
+<li><code><a title="bioenergetics..model.Model.__init__" href="#bioenergetics..model.Model.__init__">__init__</a></code></li>
+<li><code><a title="bioenergetics..model.Model.best_depth" href="#bioenergetics..model.Model.best_depth">best_depth</a></code></li>
+<li><code><a title="bioenergetics..model.Model.compute_bioenergetics" href="#bioenergetics..model.Model.compute_bioenergetics">compute_bioenergetics</a></code></li>
+<li><code><a title="bioenergetics..model.Model.compute_cmax" href="#bioenergetics..model.Model.compute_cmax">compute_cmax</a></code></li>
+<li><code><a title="bioenergetics..model.Model.compute_foragingbydepth" href="#bioenergetics..model.Model.compute_foragingbydepth">compute_foragingbydepth</a></code></li>
+<li><code><a title="bioenergetics..model.Model.compute_ft" href="#bioenergetics..model.Model.compute_ft">compute_ft</a></code></li>
+<li><code><a title="bioenergetics..model.Model.compute_growth" href="#bioenergetics..model.Model.compute_growth">compute_growth</a></code></li>
+<li><code><a title="bioenergetics..model.Model.compute_respiration" href="#bioenergetics..model.Model.compute_respiration">compute_respiration</a></code></li>
+<li><code><a title="bioenergetics..model.Model.compute_waste" href="#bioenergetics..model.Model.compute_waste">compute_waste</a></code></li>
+<li><code><a title="bioenergetics..model.Model.energy_density" href="#bioenergetics..model.Model.energy_density">energy_density</a></code></li>
+<li><code><a title="bioenergetics..model.Model.growth_fn" href="#bioenergetics..model.Model.growth_fn">growth_fn</a></code></li>
+<li><code><a title="bioenergetics..model.Model.run" href="#bioenergetics..model.Model.run">run</a></code></li>
+<li><code><a title="bioenergetics..model.Model.sustainability_estimate" href="#bioenergetics..model.Model.sustainability_estimate">sustainability_estimate</a></code></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</nav>
+</main>
+<footer id="footer">
+<p>Generated by <a href="https://pdoc3.github.io/pdoc"><cite>pdoc</cite> 0.5.3</a>.</p>
+</footer>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js"></script>
+<script>hljs.initHighlightingOnLoad()</script>
+</body>
+</html>
