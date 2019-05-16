@@ -125,7 +125,7 @@ class Model:
     def __init__(self, starting_mass, prey_data, temp_fn, bathymetry_fn,
                  day_hours, light_extinction, params=params.Chinook(),
                  depth_max=10000, depth_min=-1, day_light=850, night_light=0.1,
-                 surface_elevation=100000):
+                 surface_elevation=100000, allow_dvm=True, max_P=1.0):
         """Constructor method
 
         Args:
@@ -156,6 +156,11 @@ class Model:
             surface_elevation: An optional numeric value specifying the
                 elevation of the water's surface in meters. If not given,
                 this is derived from the the `domain` value of `bathymetry_fn`.
+            allow_dvm: An optional boolean parameter that allows the fish to
+                perform diel vertical migration, selecting different depths for
+                day and night time periods. Defaults to true.
+            max_P: An optional numeric parameter that caps the proportion of
+                maximum consumption that is allowed. Defaults to 1.0
         """
         self.prey_data = prey_data
         self.light_extinction = light_extinction
@@ -175,6 +180,8 @@ class Model:
         self.starting_length = params.length_from_weight(self.starting_mass)
         self.temp_from_depth = temp_fn
         self.area_from_elevation = bathymetry_fn
+        self.allow_dvm = allow_dvm
+        self.max_P = max_P
 
     def compute_foragingbydepth(self, length, mass, surface_light, depth):
         """Specific encounter rate for a fish of given size at a given depth.
@@ -474,21 +481,36 @@ class Model:
         day_hours = self.day_hours
         night_hours = 24.0 - day_hours
 
-        def objective(x):
-            (day_depth,night_depth) = x
-            res = self.growth_fn(day_depth, night_depth, length,
-                                 mass, day_hours, night_hours)
-            return -res[0]
-        depth_bounds = (self.depth_min, self.depth_max)
+        if self.allow_dvm:
+            depth_bounds = ((self.depth_min, self.depth_max),
+                            (self.depth_min, self.depth_max))
+
+            def objective(depth_pair):
+                (day_depth, night_depth) = depth_pair
+                res = self.growth_fn(day_depth, night_depth, length,
+                                     mass, day_hours, night_hours)
+                return -res[0]
+        else:
+            depth_bounds = ((self.depth_min, self.depth_max),)
+
+            def objective(d):
+                res = self.growth_fn(d, d, length,
+                                     mass, day_hours, night_hours)
+                return -res[0]
+
         if x0 is None:
             # find an initial guess via grid search
-            x0 = brute(objective, (depth_bounds, depth_bounds))
-        res = minimize(objective, x0=x0,
-                       method='L-BFGS-B',
-                       bounds=[(self.depth_min, self.depth_max),
-                               (self.depth_min, self.depth_max)],
-                       jac='2-point', options={'eps': 1e-3})
-        best_depths = res.x
+            x0 = brute(objective, depth_bounds)
+        elif not self.allow_dvm:
+            x0 = [x0[0]]
+
+        res = minimize(objective, x0=x0, method='L-BFGS-B',
+                       bounds=depth_bounds, jac='2-point',
+                       options={'eps': 1e-3})
+        if self.allow_dvm:
+            best_depths = res.x
+        else:
+            best_depths = (res.x[0], res.x[0])
         (day_depth, night_depth) = best_depths
         best_results = self.growth_fn(day_depth, night_depth, length,
                                       mass, day_hours, night_hours)
@@ -532,12 +554,12 @@ class Model:
                                                       night_depth)
         if day_foraging > night_foraging:
             day_foraging *= day_hours
-            day_P = min(day_foraging/cmax, 1)
-            night_P = min(1.0 - day_P, night_foraging*night_hours)
+            day_P = min(day_foraging/cmax, self.max_P)
+            night_P = min(self.max_P - day_P, night_foraging*night_hours)
         else:
             night_foraging *= night_hours
-            night_P = min(night_foraging/cmax, 1.0)
-            day_P = min(1.0 - night_P, day_foraging*day_hours)
+            night_P = min(night_foraging/cmax, self.max_P)
+            day_P = min(self.max_P - night_P, day_foraging*day_hours)
 
         day_bioe = self.compute_bioenergetics(mass, day_temp, day_P)
         night_bioe = self.compute_bioenergetics(mass, night_temp, night_P)
@@ -629,12 +651,12 @@ class Model:
             out['day_depth'].append(day_depth)
             out['night_depth'].append(night_depth)
             out['growth'].append(growth)
-            out['Mass'].append(mass)
-            out['Length'].append(length)
+            out['mass'].append(mass)
+            out['length'].append(length)
             out['egestion'].append(egestion)
             out['excretion'].append(excretion)
             out['consumption'].append(consumption)
-            out['P'].append(P)
+            out['p'].append(P)
             out['day_temperature'].append(day_temp)
             out['night_temperature'].append(night_temp)
             out['day_P'].append(day_P)
