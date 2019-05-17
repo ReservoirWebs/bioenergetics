@@ -18,6 +18,7 @@
 """
 
 
+from datetime import date, timedelta
 from collections import defaultdict
 import numpy as np
 from scipy.interpolate import interp1d
@@ -595,7 +596,7 @@ class Model:
         pop_est = consumable/(consumed*4)
         return pop_est
 
-    def run(self, n_days=30):
+    def run(self, n_days=30, start_date=None):
         """Simulate fish growth over a period of several days.
 
         Beginning with a fish with a mass equal to
@@ -606,12 +607,17 @@ class Model:
         Args:
             n_days: An optional parameter specifying the number of days
                 to simulate. Defaults to 30.
+            start_date: An optional parameter specifying the start date of
+                the simulation. Accepts either a `datetime.date` object or a
+                3-element tuple containing `(year, month, day)`
 
         Returns:
             A dictionary containing simulation outputs. Each entry is a
             list with `n_days` elements, corresponding to the values from
             each day. The output contains the following keys:
 
+            date: If `start_date` is given, a date string in ISO format
+                (YYYY-MM-DD), otherwise an integer index starting at 1.
             mass: The mass of the fish in grams at the end of each day.
             length: The length of fish in millimeters at the end of each day.
             day_depth: The daytime depth of the fish in meters.
@@ -626,6 +632,9 @@ class Model:
             day_temperature: The temperature corresponding to `day_depth`.
             night_temperature: The temperature corresponding to `night_depth`.
 
+        Raises:
+            AssertionError: n_days is not a positive integer
+
         """
         assert (n_days >= 1), "n_days must be a positive integer"
 
@@ -635,6 +644,12 @@ class Model:
         last_best_depths = None
         length = self.starting_length
         mass = self.starting_mass
+
+        use_date = (start_date is not None)
+        if use_date and not isinstance(start_date, date):
+            start_date = date(*start_date)
+        ONE_DAY = timedelta(days=1)
+
         for d in range(n_days):
             best_depths, best_results = self.best_depth(length, mass,
                                                         last_best_depths)
@@ -648,6 +663,12 @@ class Model:
             mass += growth
             if growth > 0:
                 length = self.params.length_from_weight(mass)
+
+            if use_date:
+                datestamp = (start_date + ONE_DAY*d).isoformat()
+                out['date'].append(datestamp)
+            else:
+                out['date'].append(int(d+1))
             out['day_depth'].append(day_depth)
             out['night_depth'].append(night_depth)
             out['growth'].append(growth)
