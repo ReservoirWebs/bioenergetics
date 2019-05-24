@@ -206,19 +206,16 @@ class Model:
         lightenergy = light/51.2
 
         # Note that reaction distance is in cm
-        if lightenergy < 1.045:
-            reactiondistance = 1.1
-        if lightenergy >= 1.045:
-            suspendedsediment = -((np.log10(lightenergy) - 1.045)/(.0108))
-            if suspendedsediment <= 0:
-                reactiondistance = 31.64
-            if suspendedsediment > 0:
-                turbidity = .96*np.log10(suspendedsediment+1) - .002
-                reactiondistance = (31.64-13.31*turbidity)
-            # ~1.1 from this paper, 8 based on kokanee (is ~ the
-            # median observed for this Chinook study)
-            if reactiondistance < 1.1:
-                reactiondistance = 1.1
+        suspendedsediment = -((np.log10(lightenergy) - 1.045)/(.0108))
+        if suspendedsediment <= 0:
+            reactiondistance = 31.64
+        else:
+            turbidity = .96*np.log10(suspendedsediment+1) - .002
+            reactiondistance = (31.64-13.31*turbidity)
+
+        # ~1.1 from this paper, 8 based on kokanee (is ~ the
+        # median observed for this Chinook study)
+        reactiondistance = max(reactiondistance, 8)
         swim_speed = self.params.swim_speed * length/10
         searchvolume = np.pi * (reactiondistance ** 2) * swim_speed
         # prey per hour
