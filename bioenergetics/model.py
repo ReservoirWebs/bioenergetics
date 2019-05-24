@@ -236,7 +236,7 @@ class Model:
 
         # use if want to further restrict capture
         # encounter_rate = 0.9 * encounter_rate
-        gramsER = encounter_rate * self.prey_data.weight
+        gramsER = encounter_rate * self.prey_data.wet_weight
         return gramsER / mass
 
     def compute_ft(self, temperature):
@@ -659,7 +659,7 @@ class Model:
              respiration, SDAction, P, day_P, night_P) = best_results
             day_temp = self.temp_from_depth(day_depth)
             night_temp = self.temp_from_depth(night_depth)
-            dailyconsume = (consumption*mass) / self.prey_data.weight
+            dailyconsume = (consumption*mass) / self.prey_data.wet_weight
             mass += growth
             if growth > 0:
                 length = self.params.length_from_weight(mass)
@@ -682,6 +682,10 @@ class Model:
             out['night_temperature'].append(night_temp)
             out['day_P'].append(day_P)
             out['night_P'].append(night_P)
+
+            # early stopping condition
+            if mass < 0:
+                break
 
         PopEst = self.sustainability_estimate(day_depth, dailyconsume)
         condition = float(100*(mass-self.starting_mass)*((length/10)**(-3.0)))

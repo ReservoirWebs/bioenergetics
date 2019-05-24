@@ -26,7 +26,8 @@ from scipy.interpolate import interp1d
 
 class PreyData(object):
     def __init__(self, abundance, depths, counts, energy=None,
-                 indigestibility=None, size=None, weight=None, *args, **kwargs):
+                 indigestibility=None, size=None, wet_weight=None,
+                 dry_weight=None, *args, **kwargs):
         self.abundance = abundance
         self.depths = depths
         self.min_depth = np.min(depths)
@@ -38,10 +39,9 @@ class PreyData(object):
 
         self.compute_depth_profile()
 
-        if weight:
-            self.weight = weight
-        elif size:
-            self.weight = self.weight_from_size(size)
+        self.wet_weight = wet_weight or self.weight_from_size(size, kind='wet')
+        self.dry_weight = dry_weight or self.weight_from_size(size, kind='dry')
+
 
     def _init_extra(self):
         """
@@ -63,41 +63,34 @@ class PreyData(object):
     def prey_count(self, d):
         return self.depth_fn(d)
 
-    def weight_from_size(self, size):
+    def weight_from_size(self, size, kind):
+        """Subclasses should implement relationships for kind='wet'
+        and kind='dry', if known.
+        """
         pass
 
 
 class DaphniaData(PreyData):
-    def _init_extra(self, weight_eq='smirnov'):
-        if weight_eq.lower() in ['smirnov', 'cornell', 'pechen']:
-            self.weight_eq = weight_eq
-        else:
-            raise ValueError('kind must be one of: ' +
-                             '"smirnov", "cornell", "pechen"')
-
-        # From Luecke and Brandt 22.7 overall, 23.3 kJ/g for unfrozen
-        # Daphnia (dry weight) 1.62 kJ/g wet weight
+    def _init_extra(self):
+        # From Koehler et. al. 2006 kJ/g
         if self.energy is None:
-            self.energy = 22700
+            self.energy = 3976
 
         # Noue and Choubert 1985 suggest Daphnia are 82.6% digestible
         # by Rainbow Trout
         if self.indigestibility is None:
             self.indigestibility = 0.174
 
-    def weight_from_size(self, size):
+
+    def weight_from_size(self, size, kind='wet'):
         """Compute weight for daphnia from size in mm.
 
-        Three weight relationships are available, selected by the
-        'weight_eq' parameter
+        For kind == 'wet', use the regression described in Smirnov 2004
+        For kind == 'dry', use the Cornell equation
         """
-        if self.weight_eq == 'smirnov':
+        if kind == 'wet':
             # Wet weight from Smirnov 2014 (g from mg)
-            return (0.075 * size ** 2.925) / 1000
-        elif self.weight_eq == 'cornell':
+            return (10.674 * size ** 2.093) / 1000
+        elif kind == 'dry':
             # Based off Cornell equation (g from ug)
             return (np.exp(1.468 + 2.83 * np.log(size))) / 1000000
-        elif self.weight_eq == 'pechen':
-            # Using Pechen 1965 fresh weight / length relationship
-            # reported in Dumont for D. magna
-            return (0.052 * size ** 3.012) / 1000
