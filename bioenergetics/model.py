@@ -361,8 +361,8 @@ class Model:
                       "TEMPERATURES OVER 25C!")
             else:
                 VEL = ACT * (W ** RK4) * np.exp(BACT * temperature)
-                FTmetabolism = np.exp(RQ * temperature)
-                activity = np.exp(RTO * VEL)
+            FTmetabolism = np.exp(RQ * temperature)
+            activity = np.exp(RTO * VEL)
         elif eq == 2:
             Vresp = (RTM - temperature) / (RTM - RTO)
             Zresp = np.log(RQ) * (RTM - RTO)
