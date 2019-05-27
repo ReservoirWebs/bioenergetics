@@ -125,7 +125,7 @@ class Model:
     """
     def __init__(self, starting_mass, prey_data, temp_fn, bathymetry_fn,
                  day_hours, light_extinction, params=params.Chinook(),
-                 depth_max=10000, depth_min=-1, day_light=850, night_light=0.1,
+                 depth_max=10000, depth_min=-1, day_light=39350, night_light=0.1,
                  surface_elevation=100000, allow_dvm=True, max_P=1.0):
         """Constructor method
 
@@ -151,7 +151,7 @@ class Model:
                 simulated depth. If no value is given, this is equal the
                 minimum `domain` value of `temp_fn`
             day_light: An optional numeric value specifying the surface light
-                intensity during day time, in lux. Defaults to 850.
+                intensity during day time, in lux. Defaults to 39350.
             night_light: An optional numeric value specifying the surface light
                 intensity during night time, in lux. Defaults to 0.1.
             surface_elevation: An optional numeric value specifying the
@@ -215,7 +215,7 @@ class Model:
 
         # ~1.1 from this paper, 8 based on kokanee (is ~ the
         # median observed for this Chinook study)
-        reactiondistance = max(reactiondistance, 8)
+        reactiondistance = max(reactiondistance, 1.1)
         swim_speed = self.params.swim_speed * length/10
         searchvolume = np.pi * (reactiondistance ** 2) * swim_speed
         # prey per hour
@@ -228,8 +228,10 @@ class Model:
         # the 29.858 cap
         max_er = (29.858 * (prey_density * 1000) *
                   ((4.271 + prey_density * 1000) ** (-1)) * 60)
+        #print(encounter_rate, max_er)
         if encounter_rate > max_er:
             encounter_rate = max_er
+
 
         # use if want to further restrict capture
         # encounter_rate = 0.9 * encounter_rate
