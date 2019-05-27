@@ -7,8 +7,13 @@ from scipy.integrate import trapz
 import numpy as np
 from matplotlib import pyplot
 
+
 def select_rows(csvfile, x_key, y_key, site=None, month=None, year=None):
     """From an input csv file, select rows for a given site and season."""
+
+    site = site and str(site)
+    month = month and str(month)
+    year = year and str(year)
     with open(csvfile) as fid:
         reader = DictReader(fid)
         rows = [r for r in reader
@@ -88,7 +93,7 @@ def transpose_dict(d):
     return transposed
 
 
-def export_results(results, filename, fmt=None):
+def export_results(results, filename, fmt=None, extra_columns=None):
     """Write model outputs to file
 
     Args:
@@ -102,6 +107,7 @@ def export_results(results, filename, fmt=None):
 
     Raises:
         AssertionError: when an unrecognized value is passed to `fmt`
+        TypeError: extra_columns is not a dictionary or None
     """
 
     if not fmt:
@@ -114,13 +120,19 @@ def export_results(results, filename, fmt=None):
         assert (fmt.lower() in ['json', 'csv']), \
             'fmt must be either "json" or "csv"'
 
+    rs = results.copy()
+    if extra_columns is not None:
+        rs.update(extra_columns)
+    rs = transpose_dict(rs)
+
+    print('exporting %d rows to %s' % (len(rs), filename))
     with open(filename, 'w') as fid:
         if ext.lower() == 'json':
-            json.dump(results, fid)
+            json.dump(rs, fid)
         else:
-            writer = DictWriter(fid, results[0].keys())
+            writer = DictWriter(fid, rs[0].keys())
             writer.writeheader()
-            writer.writerows(results)
+            writer.writerows(rs)
 
 
 def plot_results(results, filename=None, title=None):

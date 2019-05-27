@@ -1,5 +1,5 @@
 import json
-from csv import DictReader
+from datetime import date
 import pytest
 from scipy.integrate import trapz
 import numpy as np
@@ -8,23 +8,22 @@ from bioenergetics.model import Model, InterpolatedFunction
 from bioenergetics.prey import DaphniaData
 
 year = '2015'
-month = 'June'
+month = 6
 site = 'Fall Creek'
 surface_elevation = 833.3
 light_extinction = 0.792
 
-daylengths = {'March': 11.83, 'April': 13.4, 'May': 14.73, 'June': 15.42,
-              'July': 15.12, 'August': 13.97, 'September': 12.45}
+daylengths = [12,12,12,11.83,13.4,14.73,15.42,15.12,13.97,12.45,12,12,12]
 
 
 @pytest.fixture
 def daphnia_data():
     total_daphnia = 5020.65
     daphnia_size = 1.26
-    x, y = util.select_rows('tests/data/daphnia-vd.csv',
-                            'depth', 'total daphnia',
-                            site, month, year)
-    return DaphniaData(total_daphnia, x, y, size=daphnia_size)
+    depth, counts = util.select_rows('tests/data/daphnia-vd.csv',
+                                     'depth', 'total daphnia',
+                                     site, month, year)
+    return DaphniaData(total_daphnia, depth, counts, size=daphnia_size)
 
 
 @pytest.fixture
@@ -43,14 +42,29 @@ def temperature():
     return InterpolatedFunction(depths, temperatures)
 
 
-@pytest.fixture
-def regression_artifact():
-    with open('tests/data/fc-201506-regression.json') as fid:
-        return json.load(fid)
+def regression_test(results, filename):
+    try:
+        with open(filename) as fid:
+            artifact = json.load(fid)
+    except FileNotFoundError:
+        artifact = None
+
+    if artifact:
+        assert results == artifact
+    else:
+        with open(filename, 'w') as fid:
+            json.dump(results, fid, default=lambda x: int(x))
+
+
+def safe_round(values, decimals):
+    try:
+        return list(np.round(values, decimals))
+    except Exception:
+        return values
 
 
 def truncate(results, decimals=3):
-    return {k: list(np.round(v, decimals)) for k, v in results.items()}
+    return {k: safe_round(v, decimals) for k, v in results.items()}
 
 
 def test_prey_depth_profile(daphnia_data):
@@ -63,12 +77,14 @@ def test_prey_depth_profile(daphnia_data):
             daphnia_data.prey_count(6))
 
 
-def test_batch(temperature, bathymetry, daphnia_data, regression_artifact):
+def test_batch(temperature, bathymetry, daphnia_data):
     starting_mass = 3.0
     batch = Model(starting_mass, daphnia_data, temperature, bathymetry,
                   daylengths[month], light_extinction)
-    results = truncate(batch.run()[0])
-    assert results == regression_artifact
+    results = truncate(batch.run(start_date=(2015, 6, 1))[0])
+    results_dt = truncate(batch.run(start_date=date(2015,6,1))[0])
+    regression_test(results, 'tests/data/fc-201506-regression.json')
+    regression_test(results_dt, 'tests/data/fc-201506-regression.json')
 
 
 def test_no_dvm(temperature, bathymetry, daphnia_data):
@@ -76,4 +92,4 @@ def test_no_dvm(temperature, bathymetry, daphnia_data):
     batch = Model(starting_mass, daphnia_data, temperature, bathymetry,
                   daylengths[month], light_extinction, allow_dvm=False)
     results = truncate(batch.run()[0])
-    print(results)
+    regression_test(results, 'tests/data/fc-2015506-nodvm-regression.json')
