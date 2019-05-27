@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
 <meta name="generator" content="pdoc 0.5.3" />
-<title>bioenergetics..prey API documentation</title>
+<title>bioenergetics.prey API documentation</title>
 <meta name="description" content="Classes for encapsulating prey data …" />
 <link href='https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.0/normalize.min.css' rel='stylesheet'>
 <link href='https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/8.0.0/sanitize.min.css' rel='stylesheet'>
@@ -17,7 +17,7 @@
 <main>
 <article id="content">
 <header>
-<h1 class="title"><code>bioenergetics..prey</code> module</h1>
+<h1 class="title"><code>bioenergetics.prey</code> module</h1>
 </header>
 <section id="section-intro">
 <p>Classes for encapsulating prey data.</p>
@@ -65,7 +65,8 @@ from scipy.interpolate import interp1d
 
 class PreyData(object):
     def __init__(self, abundance, depths, counts, energy=None,
-                 indigestibility=None, size=None, weight=None, *args, **kwargs):
+                 indigestibility=None, size=None, wet_weight=None,
+                 dry_weight=None, *args, **kwargs):
         self.abundance = abundance
         self.depths = depths
         self.min_depth = np.min(depths)
@@ -77,10 +78,9 @@ class PreyData(object):
 
         self.compute_depth_profile()
 
-        if weight:
-            self.weight = weight
-        elif size:
-            self.weight = self.weight_from_size(size)
+        self.wet_weight = wet_weight or self.weight_from_size(size, kind=&#39;wet&#39;)
+        self.dry_weight = dry_weight or self.weight_from_size(size, kind=&#39;dry&#39;)
+
 
     def _init_extra(self):
         &#34;&#34;&#34;
@@ -93,53 +93,47 @@ class PreyData(object):
     def compute_depth_profile(self):
         x = self.depths
         y = self.counts
-        surface_count = y[np.argmin(x)]
         auc = trapz(y, x)
         y = y / auc*self.abundance
+        surface_count = y[np.argmin(x)]
+        bottom_count = y[np.argmax(x)]
         self.depth_fn = interp1d(x, y, bounds_error=False,
-                                 fill_value=surface_count)
+                                 fill_value=(surface_count, bottom_count))
 
     def prey_count(self, d):
         return self.depth_fn(d)
 
-    def weight_from_size(self, size):
+    def weight_from_size(self, size, kind):
+        &#34;&#34;&#34;Subclasses should implement relationships for kind=&#39;wet&#39;
+        and kind=&#39;dry&#39;, if known.
+        &#34;&#34;&#34;
         pass
 
 
 class DaphniaData(PreyData):
-    def _init_extra(self, weight_eq=&#39;smirnov&#39;):
-        if weight_eq.lower() in [&#39;smirnov&#39;, &#39;cornell&#39;, &#39;pechen&#39;]:
-            self.weight_eq = weight_eq
-        else:
-            raise ValueError(&#39;kind must be one of: &#39; +
-                             &#39;&#34;smirnov&#34;, &#34;cornell&#34;, &#34;pechen&#34;&#39;)
-
-        # From Luecke and Brandt 22.7 overall, 23.3 kJ/g for unfrozen
-        # Daphnia (dry weight) 1.62 kJ/g wet weight
+    def _init_extra(self):
+        # From Koehler et. al. 2006 kJ/g
         if self.energy is None:
-            self.energy = 22700
+            self.energy = 3860
 
         # Noue and Choubert 1985 suggest Daphnia are 82.6% digestible
         # by Rainbow Trout
         if self.indigestibility is None:
             self.indigestibility = 0.174
 
-    def weight_from_size(self, size):
+
+    def weight_from_size(self, size, kind=&#39;wet&#39;):
         &#34;&#34;&#34;Compute weight for daphnia from size in mm.
 
-        Three weight relationships are available, selected by the
-        &#39;weight_eq&#39; parameter
+        For kind == &#39;wet&#39;, use the regression described in Smirnov 2004
+        For kind == &#39;dry&#39;, use the Cornell equation
         &#34;&#34;&#34;
-        if self.weight_eq == &#39;smirnov&#39;:
+        if kind == &#39;wet&#39;:
             # Wet weight from Smirnov 2014 (g from mg)
-            return (0.075 * size ** 2.925) / 1000
-        elif self.weight_eq == &#39;cornell&#39;:
+            return (10.674 * size ** 2.093) / 1000
+        elif kind == &#39;dry&#39;:
             # Based off Cornell equation (g from ug)
-            return (np.exp(1.468 + 2.83 * np.log(size))) / 1000000
-        elif self.weight_eq == &#39;pechen&#39;:
-            # Using Pechen 1965 fresh weight / length relationship
-            # reported in Dumont for D. magna
-            return (0.052 * size ** 3.012) / 1000</code></pre>
+            return (np.exp(1.468 + 2.83 * np.log(size))) / 1000000</code></pre>
 </details>
 </section>
 <section>
@@ -151,89 +145,75 @@ class DaphniaData(PreyData):
 <section>
 <h2 class="section-title" id="header-classes">Classes</h2>
 <dl>
-<dt id="bioenergetics..prey.DaphniaData"><code class="flex name class">
+<dt id="bioenergetics.prey.DaphniaData"><code class="flex name class">
 <span>class <span class="ident">DaphniaData</span></span>
-<span>(</span><span><small>ancestors:</small> <a title="bioenergetics..prey.PreyData" href="#bioenergetics..prey.PreyData">PreyData</a>)</span>
+<span>(</span><span><small>ancestors:</small> <a title="bioenergetics.prey.PreyData" href="#bioenergetics.prey.PreyData">PreyData</a>)</span>
 </code></dt>
 <dd>
 <section class="desc"></section>
 <details class="source">
 <summary>Source code</summary>
 <pre><code class="python">class DaphniaData(PreyData):
-    def _init_extra(self, weight_eq=&#39;smirnov&#39;):
-        if weight_eq.lower() in [&#39;smirnov&#39;, &#39;cornell&#39;, &#39;pechen&#39;]:
-            self.weight_eq = weight_eq
-        else:
-            raise ValueError(&#39;kind must be one of: &#39; +
-                             &#39;&#34;smirnov&#34;, &#34;cornell&#34;, &#34;pechen&#34;&#39;)
-
-        # From Luecke and Brandt 22.7 overall, 23.3 kJ/g for unfrozen
-        # Daphnia (dry weight) 1.62 kJ/g wet weight
+    def _init_extra(self):
+        # From Koehler et. al. 2006 kJ/g
         if self.energy is None:
-            self.energy = 22700
+            self.energy = 3860
 
         # Noue and Choubert 1985 suggest Daphnia are 82.6% digestible
         # by Rainbow Trout
         if self.indigestibility is None:
             self.indigestibility = 0.174
 
-    def weight_from_size(self, size):
+
+    def weight_from_size(self, size, kind=&#39;wet&#39;):
         &#34;&#34;&#34;Compute weight for daphnia from size in mm.
 
-        Three weight relationships are available, selected by the
-        &#39;weight_eq&#39; parameter
+        For kind == &#39;wet&#39;, use the regression described in Smirnov 2004
+        For kind == &#39;dry&#39;, use the Cornell equation
         &#34;&#34;&#34;
-        if self.weight_eq == &#39;smirnov&#39;:
+        if kind == &#39;wet&#39;:
             # Wet weight from Smirnov 2014 (g from mg)
-            return (0.075 * size ** 2.925) / 1000
-        elif self.weight_eq == &#39;cornell&#39;:
+            return (10.674 * size ** 2.093) / 1000
+        elif kind == &#39;dry&#39;:
             # Based off Cornell equation (g from ug)
-            return (np.exp(1.468 + 2.83 * np.log(size))) / 1000000
-        elif self.weight_eq == &#39;pechen&#39;:
-            # Using Pechen 1965 fresh weight / length relationship
-            # reported in Dumont for D. magna
-            return (0.052 * size ** 3.012) / 1000</code></pre>
+            return (np.exp(1.468 + 2.83 * np.log(size))) / 1000000</code></pre>
 </details>
 <h3>Methods</h3>
 <dl>
-<dt id="bioenergetics..prey.DaphniaData.weight_from_size"><code class="name flex">
-<span>def <span class="ident">weight_from_size</span></span>(<span>self, size)</span>
+<dt id="bioenergetics.prey.DaphniaData.weight_from_size"><code class="name flex">
+<span>def <span class="ident">weight_from_size</span></span>(<span>self, size, kind=&#39;wet&#39;)</span>
 </code></dt>
 <dd>
 <section class="desc"><p>Compute weight for daphnia from size in mm.</p>
-<p>Three weight relationships are available, selected by the
-'weight_eq' parameter</p></section>
+<p>For kind == 'wet', use the regression described in Smirnov 2004
+For kind == 'dry', use the Cornell equation</p></section>
 <details class="source">
 <summary>Source code</summary>
-<pre><code class="python">def weight_from_size(self, size):
+<pre><code class="python">def weight_from_size(self, size, kind=&#39;wet&#39;):
     &#34;&#34;&#34;Compute weight for daphnia from size in mm.
 
-    Three weight relationships are available, selected by the
-    &#39;weight_eq&#39; parameter
+    For kind == &#39;wet&#39;, use the regression described in Smirnov 2004
+    For kind == &#39;dry&#39;, use the Cornell equation
     &#34;&#34;&#34;
-    if self.weight_eq == &#39;smirnov&#39;:
+    if kind == &#39;wet&#39;:
         # Wet weight from Smirnov 2014 (g from mg)
-        return (0.075 * size ** 2.925) / 1000
-    elif self.weight_eq == &#39;cornell&#39;:
+        return (10.674 * size ** 2.093) / 1000
+    elif kind == &#39;dry&#39;:
         # Based off Cornell equation (g from ug)
-        return (np.exp(1.468 + 2.83 * np.log(size))) / 1000000
-    elif self.weight_eq == &#39;pechen&#39;:
-        # Using Pechen 1965 fresh weight / length relationship
-        # reported in Dumont for D. magna
-        return (0.052 * size ** 3.012) / 1000</code></pre>
+        return (np.exp(1.468 + 2.83 * np.log(size))) / 1000000</code></pre>
 </details>
 </dd>
 </dl>
 <h3>Inherited members</h3>
 <ul class="hlist">
-<li><code><b><a title="bioenergetics..prey.PreyData" href="#bioenergetics..prey.PreyData">PreyData</a></b></code>:
+<li><code><b><a title="bioenergetics.prey.PreyData" href="#bioenergetics.prey.PreyData">PreyData</a></b></code>:
 <ul class="hlist">
-<li><code><a title="bioenergetics..prey.PreyData.__init__" href="#bioenergetics..prey.PreyData.__init__">__init__</a></code></li>
+<li><code><a title="bioenergetics.prey.PreyData.__init__" href="#bioenergetics.prey.PreyData.__init__">__init__</a></code></li>
 </ul>
 </li>
 </ul>
 </dd>
-<dt id="bioenergetics..prey.PreyData"><code class="flex name class">
+<dt id="bioenergetics.prey.PreyData"><code class="flex name class">
 <span>class <span class="ident">PreyData</span></span>
 </code></dt>
 <dd>
@@ -242,7 +222,8 @@ class DaphniaData(PreyData):
 <summary>Source code</summary>
 <pre><code class="python">class PreyData(object):
     def __init__(self, abundance, depths, counts, energy=None,
-                 indigestibility=None, size=None, weight=None, *args, **kwargs):
+                 indigestibility=None, size=None, wet_weight=None,
+                 dry_weight=None, *args, **kwargs):
         self.abundance = abundance
         self.depths = depths
         self.min_depth = np.min(depths)
@@ -254,10 +235,9 @@ class DaphniaData(PreyData):
 
         self.compute_depth_profile()
 
-        if weight:
-            self.weight = weight
-        elif size:
-            self.weight = self.weight_from_size(size)
+        self.wet_weight = wet_weight or self.weight_from_size(size, kind=&#39;wet&#39;)
+        self.dry_weight = dry_weight or self.weight_from_size(size, kind=&#39;dry&#39;)
+
 
     def _init_extra(self):
         &#34;&#34;&#34;
@@ -270,26 +250,30 @@ class DaphniaData(PreyData):
     def compute_depth_profile(self):
         x = self.depths
         y = self.counts
-        surface_count = y[np.argmin(x)]
         auc = trapz(y, x)
         y = y / auc*self.abundance
+        surface_count = y[np.argmin(x)]
+        bottom_count = y[np.argmax(x)]
         self.depth_fn = interp1d(x, y, bounds_error=False,
-                                 fill_value=surface_count)
+                                 fill_value=(surface_count, bottom_count))
 
     def prey_count(self, d):
         return self.depth_fn(d)
 
-    def weight_from_size(self, size):
+    def weight_from_size(self, size, kind):
+        &#34;&#34;&#34;Subclasses should implement relationships for kind=&#39;wet&#39;
+        and kind=&#39;dry&#39;, if known.
+        &#34;&#34;&#34;
         pass</code></pre>
 </details>
 <h3>Subclasses</h3>
 <ul class="hlist">
-<li><a title="bioenergetics..prey.DaphniaData" href="#bioenergetics..prey.DaphniaData">DaphniaData</a></li>
+<li><a title="bioenergetics.prey.DaphniaData" href="#bioenergetics.prey.DaphniaData">DaphniaData</a></li>
 </ul>
 <h3>Methods</h3>
 <dl>
-<dt id="bioenergetics..prey.PreyData.__init__"><code class="name flex">
-<span>def <span class="ident">__init__</span></span>(<span>self, abundance, depths, counts, energy=None, indigestibility=None, size=None, weight=None, *args, **kwargs)</span>
+<dt id="bioenergetics.prey.PreyData.__init__"><code class="name flex">
+<span>def <span class="ident">__init__</span></span>(<span>self, abundance, depths, counts, energy=None, indigestibility=None, size=None, wet_weight=None, dry_weight=None, *args, **kwargs)</span>
 </code></dt>
 <dd>
 <section class="desc"><p>Initialize self.
@@ -297,7 +281,8 @@ See help(type(self)) for accurate signature.</p></section>
 <details class="source">
 <summary>Source code</summary>
 <pre><code class="python">def __init__(self, abundance, depths, counts, energy=None,
-             indigestibility=None, size=None, weight=None, *args, **kwargs):
+             indigestibility=None, size=None, wet_weight=None,
+             dry_weight=None, *args, **kwargs):
     self.abundance = abundance
     self.depths = depths
     self.min_depth = np.min(depths)
@@ -309,13 +294,11 @@ See help(type(self)) for accurate signature.</p></section>
 
     self.compute_depth_profile()
 
-    if weight:
-        self.weight = weight
-    elif size:
-        self.weight = self.weight_from_size(size)</code></pre>
+    self.wet_weight = wet_weight or self.weight_from_size(size, kind=&#39;wet&#39;)
+    self.dry_weight = dry_weight or self.weight_from_size(size, kind=&#39;dry&#39;)</code></pre>
 </details>
 </dd>
-<dt id="bioenergetics..prey.PreyData.compute_depth_profile"><code class="name flex">
+<dt id="bioenergetics.prey.PreyData.compute_depth_profile"><code class="name flex">
 <span>def <span class="ident">compute_depth_profile</span></span>(<span>self)</span>
 </code></dt>
 <dd>
@@ -325,14 +308,15 @@ See help(type(self)) for accurate signature.</p></section>
 <pre><code class="python">def compute_depth_profile(self):
     x = self.depths
     y = self.counts
-    surface_count = y[np.argmin(x)]
     auc = trapz(y, x)
     y = y / auc*self.abundance
+    surface_count = y[np.argmin(x)]
+    bottom_count = y[np.argmax(x)]
     self.depth_fn = interp1d(x, y, bounds_error=False,
-                             fill_value=surface_count)</code></pre>
+                             fill_value=(surface_count, bottom_count))</code></pre>
 </details>
 </dd>
-<dt id="bioenergetics..prey.PreyData.prey_count"><code class="name flex">
+<dt id="bioenergetics.prey.PreyData.prey_count"><code class="name flex">
 <span>def <span class="ident">prey_count</span></span>(<span>self, d)</span>
 </code></dt>
 <dd>
@@ -343,14 +327,18 @@ See help(type(self)) for accurate signature.</p></section>
     return self.depth_fn(d)</code></pre>
 </details>
 </dd>
-<dt id="bioenergetics..prey.PreyData.weight_from_size"><code class="name flex">
-<span>def <span class="ident">weight_from_size</span></span>(<span>self, size)</span>
+<dt id="bioenergetics.prey.PreyData.weight_from_size"><code class="name flex">
+<span>def <span class="ident">weight_from_size</span></span>(<span>self, size, kind)</span>
 </code></dt>
 <dd>
-<section class="desc"></section>
+<section class="desc"><p>Subclasses should implement relationships for kind='wet'
+and kind='dry', if known.</p></section>
 <details class="source">
 <summary>Source code</summary>
-<pre><code class="python">def weight_from_size(self, size):
+<pre><code class="python">def weight_from_size(self, size, kind):
+    &#34;&#34;&#34;Subclasses should implement relationships for kind=&#39;wet&#39;
+    and kind=&#39;dry&#39;, if known.
+    &#34;&#34;&#34;
     pass</code></pre>
 </details>
 </dd>
@@ -367,24 +355,24 @@ See help(type(self)) for accurate signature.</p></section>
 <ul id="index">
 <li><h3>Super-module</h3>
 <ul>
-<li><code><a title="bioenergetics." href="index.html">bioenergetics.</a></code></li>
+<li><code><a title="bioenergetics" href="index.html">bioenergetics</a></code></li>
 </ul>
 </li>
 <li><h3><a href="#header-classes">Classes</a></h3>
 <ul>
 <li>
-<h4><code><a title="bioenergetics..prey.DaphniaData" href="#bioenergetics..prey.DaphniaData">DaphniaData</a></code></h4>
+<h4><code><a title="bioenergetics.prey.DaphniaData" href="#bioenergetics.prey.DaphniaData">DaphniaData</a></code></h4>
 <ul class="">
-<li><code><a title="bioenergetics..prey.DaphniaData.weight_from_size" href="#bioenergetics..prey.DaphniaData.weight_from_size">weight_from_size</a></code></li>
+<li><code><a title="bioenergetics.prey.DaphniaData.weight_from_size" href="#bioenergetics.prey.DaphniaData.weight_from_size">weight_from_size</a></code></li>
 </ul>
 </li>
 <li>
-<h4><code><a title="bioenergetics..prey.PreyData" href="#bioenergetics..prey.PreyData">PreyData</a></code></h4>
+<h4><code><a title="bioenergetics.prey.PreyData" href="#bioenergetics.prey.PreyData">PreyData</a></code></h4>
 <ul class="">
-<li><code><a title="bioenergetics..prey.PreyData.__init__" href="#bioenergetics..prey.PreyData.__init__">__init__</a></code></li>
-<li><code><a title="bioenergetics..prey.PreyData.compute_depth_profile" href="#bioenergetics..prey.PreyData.compute_depth_profile">compute_depth_profile</a></code></li>
-<li><code><a title="bioenergetics..prey.PreyData.prey_count" href="#bioenergetics..prey.PreyData.prey_count">prey_count</a></code></li>
-<li><code><a title="bioenergetics..prey.PreyData.weight_from_size" href="#bioenergetics..prey.PreyData.weight_from_size">weight_from_size</a></code></li>
+<li><code><a title="bioenergetics.prey.PreyData.__init__" href="#bioenergetics.prey.PreyData.__init__">__init__</a></code></li>
+<li><code><a title="bioenergetics.prey.PreyData.compute_depth_profile" href="#bioenergetics.prey.PreyData.compute_depth_profile">compute_depth_profile</a></code></li>
+<li><code><a title="bioenergetics.prey.PreyData.prey_count" href="#bioenergetics.prey.PreyData.prey_count">prey_count</a></code></li>
+<li><code><a title="bioenergetics.prey.PreyData.weight_from_size" href="#bioenergetics.prey.PreyData.weight_from_size">weight_from_size</a></code></li>
 </ul>
 </li>
 </ul>

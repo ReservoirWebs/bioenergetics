@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
 <meta name="generator" content="pdoc 0.5.3" />
-<title>bioenergetics..model API documentation</title>
+<title>bioenergetics.model API documentation</title>
 <meta name="description" content="Linked Bioenergetics and foraging model …" />
 <link href='https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.0/normalize.min.css' rel='stylesheet'>
 <link href='https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/8.0.0/sanitize.min.css' rel='stylesheet'>
@@ -17,7 +17,7 @@
 <main>
 <article id="content">
 <header>
-<h1 class="title"><code>bioenergetics..model</code> module</h1>
+<h1 class="title"><code>bioenergetics.model</code> module</h1>
 </header>
 <section id="section-intro">
 <p>Linked Bioenergetics and foraging model</p>
@@ -56,6 +56,7 @@ If not, see <a href="https://www.gnu.org/licenses/">https://www.gnu.org/licenses
 &#34;&#34;&#34;
 
 
+from datetime import date, timedelta
 from collections import defaultdict
 import numpy as np
 from scipy.interpolate import interp1d
@@ -162,8 +163,8 @@ class Model:
     &#34;&#34;&#34;
     def __init__(self, starting_mass, prey_data, temp_fn, bathymetry_fn,
                  day_hours, light_extinction, params=params.Chinook(),
-                 depth_max=10000, depth_min=-1, day_light=850, night_light=0.1,
-                 surface_elevation=100000):
+                 depth_max=10000, depth_min=-1, day_light=39350, night_light=0.1,
+                 surface_elevation=100000, allow_dvm=True, max_P=1.0):
         &#34;&#34;&#34;Constructor method
 
         Args:
@@ -188,12 +189,17 @@ class Model:
                 simulated depth. If no value is given, this is equal the
                 minimum `domain` value of `temp_fn`
             day_light: An optional numeric value specifying the surface light
-                intensity during day time, in lux. Defaults to 850.
+                intensity during day time, in lux. Defaults to 39350.
             night_light: An optional numeric value specifying the surface light
                 intensity during night time, in lux. Defaults to 0.1.
             surface_elevation: An optional numeric value specifying the
                 elevation of the water&#39;s surface in meters. If not given,
                 this is derived from the the `domain` value of `bathymetry_fn`.
+            allow_dvm: An optional boolean parameter that allows the fish to
+                perform diel vertical migration, selecting different depths for
+                day and night time periods. Defaults to true.
+            max_P: An optional numeric parameter that caps the proportion of
+                maximum consumption that is allowed. Defaults to 1.0
         &#34;&#34;&#34;
         self.prey_data = prey_data
         self.light_extinction = light_extinction
@@ -213,6 +219,8 @@ class Model:
         self.starting_length = params.length_from_weight(self.starting_mass)
         self.temp_from_depth = temp_fn
         self.area_from_elevation = bathymetry_fn
+        self.allow_dvm = allow_dvm
+        self.max_P = max_P
 
     def compute_foragingbydepth(self, length, mass, surface_light, depth):
         &#34;&#34;&#34;Specific encounter rate for a fish of given size at a given depth.
@@ -236,19 +244,16 @@ class Model:
         lightenergy = light/51.2
 
         # Note that reaction distance is in cm
-        if lightenergy &lt; 1.045:
-            reactiondistance = 1.1
-        if lightenergy &gt;= 1.045:
-            suspendedsediment = -((np.log10(lightenergy) - 1.045)/(.0108))
-            if suspendedsediment &lt;= 0:
-                reactiondistance = 31.64
-            if suspendedsediment &gt; 0:
-                turbidity = .96*np.log10(suspendedsediment+1) - .002
-                reactiondistance = (31.64-13.31*turbidity)
-            # ~1.1 from this paper, 8 based on kokanee (is ~ the
-            # median observed for this Chinook study)
-            if reactiondistance &lt; 1.1:
-                reactiondistance = 1.1
+        suspendedsediment = -((np.log10(lightenergy) - 1.045)/(.0108))
+        if suspendedsediment &lt;= 0:
+            reactiondistance = 31.64
+        else:
+            turbidity = .96*np.log10(suspendedsediment+1) - .002
+            reactiondistance = (31.64-13.31*turbidity)
+
+        # ~1.1 from this paper, 8 based on kokanee (is ~ the
+        # median observed for this Chinook study)
+        reactiondistance = max(reactiondistance, 1.1)
         swim_speed = self.params.swim_speed * length/10
         searchvolume = np.pi * (reactiondistance ** 2) * swim_speed
         # prey per hour
@@ -261,12 +266,14 @@ class Model:
         # the 29.858 cap
         max_er = (29.858 * (prey_density * 1000) *
                   ((4.271 + prey_density * 1000) ** (-1)) * 60)
+        #print(encounter_rate, max_er)
         if encounter_rate &gt; max_er:
             encounter_rate = max_er
 
+
         # use if want to further restrict capture
         # encounter_rate = 0.9 * encounter_rate
-        gramsER = encounter_rate * self.prey_data.weight
+        gramsER = encounter_rate * self.prey_data.wet_weight
         return gramsER / mass
 
     def compute_ft(self, temperature):
@@ -391,8 +398,8 @@ class Model:
                       &#34;TEMPERATURES OVER 25C!&#34;)
             else:
                 VEL = ACT * (W ** RK4) * np.exp(BACT * temperature)
-                FTmetabolism = np.exp(RQ * temperature)
-                activity = np.exp(RTO * VEL)
+            FTmetabolism = np.exp(RQ * temperature)
+            activity = np.exp(RTO * VEL)
         elif eq == 2:
             Vresp = (RTM - temperature) / (RTM - RTO)
             Zresp = np.log(RQ) * (RTM - RTO)
@@ -512,21 +519,36 @@ class Model:
         day_hours = self.day_hours
         night_hours = 24.0 - day_hours
 
-        def objective(x):
-            (day_depth,night_depth) = x
-            res = self.growth_fn(day_depth, night_depth, length,
-                                 mass, day_hours, night_hours)
-            return -res[0]
-        depth_bounds = (self.depth_min, self.depth_max)
+        if self.allow_dvm:
+            depth_bounds = ((self.depth_min, self.depth_max),
+                            (self.depth_min, self.depth_max))
+
+            def objective(depth_pair):
+                (day_depth, night_depth) = depth_pair
+                res = self.growth_fn(day_depth, night_depth, length,
+                                     mass, day_hours, night_hours)
+                return -res[0]
+        else:
+            depth_bounds = ((self.depth_min, self.depth_max),)
+
+            def objective(d):
+                res = self.growth_fn(d, d, length,
+                                     mass, day_hours, night_hours)
+                return -res[0]
+
         if x0 is None:
             # find an initial guess via grid search
-            x0 = brute(objective, (depth_bounds, depth_bounds))
-        res = minimize(objective, x0=x0,
-                       method=&#39;L-BFGS-B&#39;,
-                       bounds=[(self.depth_min, self.depth_max),
-                               (self.depth_min, self.depth_max)],
-                       jac=&#39;2-point&#39;, options={&#39;eps&#39;: 1e-3})
-        best_depths = res.x
+            x0 = brute(objective, depth_bounds)
+        elif not self.allow_dvm:
+            x0 = [x0[0]]
+
+        res = minimize(objective, x0=x0, method=&#39;L-BFGS-B&#39;,
+                       bounds=depth_bounds, jac=&#39;2-point&#39;,
+                       options={&#39;eps&#39;: 1e-3})
+        if self.allow_dvm:
+            best_depths = res.x
+        else:
+            best_depths = (res.x[0], res.x[0])
         (day_depth, night_depth) = best_depths
         best_results = self.growth_fn(day_depth, night_depth, length,
                                       mass, day_hours, night_hours)
@@ -570,12 +592,12 @@ class Model:
                                                       night_depth)
         if day_foraging &gt; night_foraging:
             day_foraging *= day_hours
-            day_P = min(day_foraging/cmax, 1)
-            night_P = min(1.0 - day_P, night_foraging*night_hours)
+            day_P = min(day_foraging/cmax, self.max_P)
+            night_P = min(self.max_P - day_P, night_foraging*night_hours)
         else:
             night_foraging *= night_hours
-            night_P = min(night_foraging/cmax, 1.0)
-            day_P = min(1.0 - night_P, day_foraging*day_hours)
+            night_P = min(night_foraging/cmax, self.max_P)
+            day_P = min(self.max_P - night_P, day_foraging*day_hours)
 
         day_bioe = self.compute_bioenergetics(mass, day_temp, day_P)
         night_bioe = self.compute_bioenergetics(mass, night_temp, night_P)
@@ -611,7 +633,7 @@ class Model:
         pop_est = consumable/(consumed*4)
         return pop_est
 
-    def run(self, n_days=30):
+    def run(self, n_days=30, start_date=None):
         &#34;&#34;&#34;Simulate fish growth over a period of several days.
 
         Beginning with a fish with a mass equal to
@@ -622,12 +644,17 @@ class Model:
         Args:
             n_days: An optional parameter specifying the number of days
                 to simulate. Defaults to 30.
+            start_date: An optional parameter specifying the start date of
+                the simulation. Accepts either a `datetime.date` object or a
+                3-element tuple containing `(year, month, day)`
 
         Returns:
             A dictionary containing simulation outputs. Each entry is a
             list with `n_days` elements, corresponding to the values from
             each day. The output contains the following keys:
 
+            date: If `start_date` is given, a date string in ISO format
+                (YYYY-MM-DD), otherwise an integer index starting at 1.
             mass: The mass of the fish in grams at the end of each day.
             length: The length of fish in millimeters at the end of each day.
             day_depth: The daytime depth of the fish in meters.
@@ -642,6 +669,9 @@ class Model:
             day_temperature: The temperature corresponding to `day_depth`.
             night_temperature: The temperature corresponding to `night_depth`.
 
+        Raises:
+            AssertionError: n_days is not a positive integer
+
         &#34;&#34;&#34;
         assert (n_days &gt;= 1), &#34;n_days must be a positive integer&#34;
 
@@ -651,6 +681,12 @@ class Model:
         last_best_depths = None
         length = self.starting_length
         mass = self.starting_mass
+
+        use_date = (start_date is not None)
+        if use_date and not isinstance(start_date, date):
+            start_date = date(*start_date)
+        ONE_DAY = timedelta(days=1)
+
         for d in range(n_days):
             best_depths, best_results = self.best_depth(length, mass,
                                                         last_best_depths)
@@ -660,23 +696,33 @@ class Model:
              respiration, SDAction, P, day_P, night_P) = best_results
             day_temp = self.temp_from_depth(day_depth)
             night_temp = self.temp_from_depth(night_depth)
-            dailyconsume = (consumption*mass) / self.prey_data.weight
+            dailyconsume = (consumption*mass) / self.prey_data.wet_weight
             mass += growth
             if growth &gt; 0:
                 length = self.params.length_from_weight(mass)
+
+            if use_date:
+                datestamp = (start_date + ONE_DAY*d).isoformat()
+                out[&#39;date&#39;].append(datestamp)
+            else:
+                out[&#39;date&#39;].append(int(d+1))
             out[&#39;day_depth&#39;].append(day_depth)
             out[&#39;night_depth&#39;].append(night_depth)
             out[&#39;growth&#39;].append(growth)
-            out[&#39;Mass&#39;].append(mass)
-            out[&#39;Length&#39;].append(length)
+            out[&#39;mass&#39;].append(mass)
+            out[&#39;length&#39;].append(length)
             out[&#39;egestion&#39;].append(egestion)
             out[&#39;excretion&#39;].append(excretion)
             out[&#39;consumption&#39;].append(consumption)
-            out[&#39;P&#39;].append(P)
+            out[&#39;p&#39;].append(P)
             out[&#39;day_temperature&#39;].append(day_temp)
             out[&#39;night_temperature&#39;].append(night_temp)
             out[&#39;day_P&#39;].append(day_P)
             out[&#39;night_P&#39;].append(night_P)
+
+            # early stopping condition
+            if mass &lt; 0:
+                break
 
         PopEst = self.sustainability_estimate(day_depth, dailyconsume)
         condition = float(100*(mass-self.starting_mass)*((length/10)**(-3.0)))
@@ -695,7 +741,7 @@ __pdoc__ = {&#39;InterpolatedFunction.x&#39;: False,
 <section>
 <h2 class="section-title" id="header-variables">Global variables</h2>
 <dl>
-<dt id="bioenergetics..model.O2CONV"><code class="name">var <span class="ident">O2CONV</span></code></dt>
+<dt id="bioenergetics.model.O2CONV"><code class="name">var <span class="ident">O2CONV</span></code></dt>
 <dd>
 <section class="desc"><p>J/gram of O2 in respiration conversions (Elliot and Davison 1975).</p></section>
 </dd>
@@ -706,7 +752,7 @@ __pdoc__ = {&#39;InterpolatedFunction.x&#39;: False,
 <section>
 <h2 class="section-title" id="header-classes">Classes</h2>
 <dl>
-<dt id="bioenergetics..model.InterpolatedFunction"><code class="flex name class">
+<dt id="bioenergetics.model.InterpolatedFunction"><code class="flex name class">
 <span>class <span class="ident">InterpolatedFunction</span></span>
 </code></dt>
 <dd>
@@ -815,7 +861,7 @@ t3_5 = temp_fn(3.5)
 </details>
 <h3>Methods</h3>
 <dl>
-<dt id="bioenergetics..model.InterpolatedFunction.__init__"><code class="name flex">
+<dt id="bioenergetics.model.InterpolatedFunction.__init__"><code class="name flex">
 <span>def <span class="ident">__init__</span></span>(<span>self, x, y, clip_max=None, clip_min=None)</span>
 </code></dt>
 <dd>
@@ -872,7 +918,7 @@ where y &lt; clip_min will be ignored</dd>
 </dd>
 </dl>
 </dd>
-<dt id="bioenergetics..model.Model"><code class="flex name class">
+<dt id="bioenergetics.model.Model"><code class="flex name class">
 <span>class <span class="ident">Model</span></span>
 </code></dt>
 <dd>
@@ -882,8 +928,8 @@ foraging model to simulate optimal growth for a fish species. As
 inputs, it requires parameters describing temperature depth
 profiles, bathymetry, prey abundance, and species-specific
 bioenergetics parameters. See the documentation for
-<code>bioenergetics.model.Model.__init__</code> for more details.</p>
-<p>Once instantiated, the <code>bioenergetics.model.Model.run</code>
+<a title="bioenergetics.model.Model.__init__" href="#bioenergetics.model.Model.__init__"><code>Model.__init__()</code></a> for more details.</p>
+<p>Once instantiated, the <a title="bioenergetics.model.Model.run" href="#bioenergetics.model.Model.run"><code>Model.run()</code></a>
 method will simulate a period of several days (default 30),
 determining the day- and night-time depths which
 optimize the fish's growth during that period.</p></section>
@@ -907,8 +953,8 @@ optimize the fish's growth during that period.</p></section>
     &#34;&#34;&#34;
     def __init__(self, starting_mass, prey_data, temp_fn, bathymetry_fn,
                  day_hours, light_extinction, params=params.Chinook(),
-                 depth_max=10000, depth_min=-1, day_light=850, night_light=0.1,
-                 surface_elevation=100000):
+                 depth_max=10000, depth_min=-1, day_light=39350, night_light=0.1,
+                 surface_elevation=100000, allow_dvm=True, max_P=1.0):
         &#34;&#34;&#34;Constructor method
 
         Args:
@@ -933,12 +979,17 @@ optimize the fish's growth during that period.</p></section>
                 simulated depth. If no value is given, this is equal the
                 minimum `domain` value of `temp_fn`
             day_light: An optional numeric value specifying the surface light
-                intensity during day time, in lux. Defaults to 850.
+                intensity during day time, in lux. Defaults to 39350.
             night_light: An optional numeric value specifying the surface light
                 intensity during night time, in lux. Defaults to 0.1.
             surface_elevation: An optional numeric value specifying the
                 elevation of the water&#39;s surface in meters. If not given,
                 this is derived from the the `domain` value of `bathymetry_fn`.
+            allow_dvm: An optional boolean parameter that allows the fish to
+                perform diel vertical migration, selecting different depths for
+                day and night time periods. Defaults to true.
+            max_P: An optional numeric parameter that caps the proportion of
+                maximum consumption that is allowed. Defaults to 1.0
         &#34;&#34;&#34;
         self.prey_data = prey_data
         self.light_extinction = light_extinction
@@ -958,6 +1009,8 @@ optimize the fish's growth during that period.</p></section>
         self.starting_length = params.length_from_weight(self.starting_mass)
         self.temp_from_depth = temp_fn
         self.area_from_elevation = bathymetry_fn
+        self.allow_dvm = allow_dvm
+        self.max_P = max_P
 
     def compute_foragingbydepth(self, length, mass, surface_light, depth):
         &#34;&#34;&#34;Specific encounter rate for a fish of given size at a given depth.
@@ -981,19 +1034,16 @@ optimize the fish's growth during that period.</p></section>
         lightenergy = light/51.2
 
         # Note that reaction distance is in cm
-        if lightenergy &lt; 1.045:
-            reactiondistance = 1.1
-        if lightenergy &gt;= 1.045:
-            suspendedsediment = -((np.log10(lightenergy) - 1.045)/(.0108))
-            if suspendedsediment &lt;= 0:
-                reactiondistance = 31.64
-            if suspendedsediment &gt; 0:
-                turbidity = .96*np.log10(suspendedsediment+1) - .002
-                reactiondistance = (31.64-13.31*turbidity)
-            # ~1.1 from this paper, 8 based on kokanee (is ~ the
-            # median observed for this Chinook study)
-            if reactiondistance &lt; 1.1:
-                reactiondistance = 1.1
+        suspendedsediment = -((np.log10(lightenergy) - 1.045)/(.0108))
+        if suspendedsediment &lt;= 0:
+            reactiondistance = 31.64
+        else:
+            turbidity = .96*np.log10(suspendedsediment+1) - .002
+            reactiondistance = (31.64-13.31*turbidity)
+
+        # ~1.1 from this paper, 8 based on kokanee (is ~ the
+        # median observed for this Chinook study)
+        reactiondistance = max(reactiondistance, 1.1)
         swim_speed = self.params.swim_speed * length/10
         searchvolume = np.pi * (reactiondistance ** 2) * swim_speed
         # prey per hour
@@ -1006,12 +1056,14 @@ optimize the fish's growth during that period.</p></section>
         # the 29.858 cap
         max_er = (29.858 * (prey_density * 1000) *
                   ((4.271 + prey_density * 1000) ** (-1)) * 60)
+        #print(encounter_rate, max_er)
         if encounter_rate &gt; max_er:
             encounter_rate = max_er
 
+
         # use if want to further restrict capture
         # encounter_rate = 0.9 * encounter_rate
-        gramsER = encounter_rate * self.prey_data.weight
+        gramsER = encounter_rate * self.prey_data.wet_weight
         return gramsER / mass
 
     def compute_ft(self, temperature):
@@ -1136,8 +1188,8 @@ optimize the fish's growth during that period.</p></section>
                       &#34;TEMPERATURES OVER 25C!&#34;)
             else:
                 VEL = ACT * (W ** RK4) * np.exp(BACT * temperature)
-                FTmetabolism = np.exp(RQ * temperature)
-                activity = np.exp(RTO * VEL)
+            FTmetabolism = np.exp(RQ * temperature)
+            activity = np.exp(RTO * VEL)
         elif eq == 2:
             Vresp = (RTM - temperature) / (RTM - RTO)
             Zresp = np.log(RQ) * (RTM - RTO)
@@ -1257,21 +1309,36 @@ optimize the fish's growth during that period.</p></section>
         day_hours = self.day_hours
         night_hours = 24.0 - day_hours
 
-        def objective(x):
-            (day_depth,night_depth) = x
-            res = self.growth_fn(day_depth, night_depth, length,
-                                 mass, day_hours, night_hours)
-            return -res[0]
-        depth_bounds = (self.depth_min, self.depth_max)
+        if self.allow_dvm:
+            depth_bounds = ((self.depth_min, self.depth_max),
+                            (self.depth_min, self.depth_max))
+
+            def objective(depth_pair):
+                (day_depth, night_depth) = depth_pair
+                res = self.growth_fn(day_depth, night_depth, length,
+                                     mass, day_hours, night_hours)
+                return -res[0]
+        else:
+            depth_bounds = ((self.depth_min, self.depth_max),)
+
+            def objective(d):
+                res = self.growth_fn(d, d, length,
+                                     mass, day_hours, night_hours)
+                return -res[0]
+
         if x0 is None:
             # find an initial guess via grid search
-            x0 = brute(objective, (depth_bounds, depth_bounds))
-        res = minimize(objective, x0=x0,
-                       method=&#39;L-BFGS-B&#39;,
-                       bounds=[(self.depth_min, self.depth_max),
-                               (self.depth_min, self.depth_max)],
-                       jac=&#39;2-point&#39;, options={&#39;eps&#39;: 1e-3})
-        best_depths = res.x
+            x0 = brute(objective, depth_bounds)
+        elif not self.allow_dvm:
+            x0 = [x0[0]]
+
+        res = minimize(objective, x0=x0, method=&#39;L-BFGS-B&#39;,
+                       bounds=depth_bounds, jac=&#39;2-point&#39;,
+                       options={&#39;eps&#39;: 1e-3})
+        if self.allow_dvm:
+            best_depths = res.x
+        else:
+            best_depths = (res.x[0], res.x[0])
         (day_depth, night_depth) = best_depths
         best_results = self.growth_fn(day_depth, night_depth, length,
                                       mass, day_hours, night_hours)
@@ -1315,12 +1382,12 @@ optimize the fish's growth during that period.</p></section>
                                                       night_depth)
         if day_foraging &gt; night_foraging:
             day_foraging *= day_hours
-            day_P = min(day_foraging/cmax, 1)
-            night_P = min(1.0 - day_P, night_foraging*night_hours)
+            day_P = min(day_foraging/cmax, self.max_P)
+            night_P = min(self.max_P - day_P, night_foraging*night_hours)
         else:
             night_foraging *= night_hours
-            night_P = min(night_foraging/cmax, 1.0)
-            day_P = min(1.0 - night_P, day_foraging*day_hours)
+            night_P = min(night_foraging/cmax, self.max_P)
+            day_P = min(self.max_P - night_P, day_foraging*day_hours)
 
         day_bioe = self.compute_bioenergetics(mass, day_temp, day_P)
         night_bioe = self.compute_bioenergetics(mass, night_temp, night_P)
@@ -1356,7 +1423,7 @@ optimize the fish's growth during that period.</p></section>
         pop_est = consumable/(consumed*4)
         return pop_est
 
-    def run(self, n_days=30):
+    def run(self, n_days=30, start_date=None):
         &#34;&#34;&#34;Simulate fish growth over a period of several days.
 
         Beginning with a fish with a mass equal to
@@ -1367,12 +1434,17 @@ optimize the fish's growth during that period.</p></section>
         Args:
             n_days: An optional parameter specifying the number of days
                 to simulate. Defaults to 30.
+            start_date: An optional parameter specifying the start date of
+                the simulation. Accepts either a `datetime.date` object or a
+                3-element tuple containing `(year, month, day)`
 
         Returns:
             A dictionary containing simulation outputs. Each entry is a
             list with `n_days` elements, corresponding to the values from
             each day. The output contains the following keys:
 
+            date: If `start_date` is given, a date string in ISO format
+                (YYYY-MM-DD), otherwise an integer index starting at 1.
             mass: The mass of the fish in grams at the end of each day.
             length: The length of fish in millimeters at the end of each day.
             day_depth: The daytime depth of the fish in meters.
@@ -1387,6 +1459,9 @@ optimize the fish's growth during that period.</p></section>
             day_temperature: The temperature corresponding to `day_depth`.
             night_temperature: The temperature corresponding to `night_depth`.
 
+        Raises:
+            AssertionError: n_days is not a positive integer
+
         &#34;&#34;&#34;
         assert (n_days &gt;= 1), &#34;n_days must be a positive integer&#34;
 
@@ -1396,6 +1471,12 @@ optimize the fish's growth during that period.</p></section>
         last_best_depths = None
         length = self.starting_length
         mass = self.starting_mass
+
+        use_date = (start_date is not None)
+        if use_date and not isinstance(start_date, date):
+            start_date = date(*start_date)
+        ONE_DAY = timedelta(days=1)
+
         for d in range(n_days):
             best_depths, best_results = self.best_depth(length, mass,
                                                         last_best_depths)
@@ -1405,23 +1486,33 @@ optimize the fish's growth during that period.</p></section>
              respiration, SDAction, P, day_P, night_P) = best_results
             day_temp = self.temp_from_depth(day_depth)
             night_temp = self.temp_from_depth(night_depth)
-            dailyconsume = (consumption*mass) / self.prey_data.weight
+            dailyconsume = (consumption*mass) / self.prey_data.wet_weight
             mass += growth
             if growth &gt; 0:
                 length = self.params.length_from_weight(mass)
+
+            if use_date:
+                datestamp = (start_date + ONE_DAY*d).isoformat()
+                out[&#39;date&#39;].append(datestamp)
+            else:
+                out[&#39;date&#39;].append(int(d+1))
             out[&#39;day_depth&#39;].append(day_depth)
             out[&#39;night_depth&#39;].append(night_depth)
             out[&#39;growth&#39;].append(growth)
-            out[&#39;Mass&#39;].append(mass)
-            out[&#39;Length&#39;].append(length)
+            out[&#39;mass&#39;].append(mass)
+            out[&#39;length&#39;].append(length)
             out[&#39;egestion&#39;].append(egestion)
             out[&#39;excretion&#39;].append(excretion)
             out[&#39;consumption&#39;].append(consumption)
-            out[&#39;P&#39;].append(P)
+            out[&#39;p&#39;].append(P)
             out[&#39;day_temperature&#39;].append(day_temp)
             out[&#39;night_temperature&#39;].append(night_temp)
             out[&#39;day_P&#39;].append(day_P)
             out[&#39;night_P&#39;].append(night_P)
+
+            # early stopping condition
+            if mass &lt; 0:
+                break
 
         PopEst = self.sustainability_estimate(day_depth, dailyconsume)
         condition = float(100*(mass-self.starting_mass)*((length/10)**(-3.0)))
@@ -1429,8 +1520,8 @@ optimize the fish's growth during that period.</p></section>
 </details>
 <h3>Methods</h3>
 <dl>
-<dt id="bioenergetics..model.Model.__init__"><code class="name flex">
-<span>def <span class="ident">__init__</span></span>(<span>self, starting_mass, prey_data, temp_fn, bathymetry_fn, day_hours, light_extinction, params=&lt;bioenergetics.params.Chinook object at 0x7f38334edc18&gt;, depth_max=10000, depth_min=-1, day_light=850, night_light=0.1, surface_elevation=100000)</span>
+<dt id="bioenergetics.model.Model.__init__"><code class="name flex">
+<span>def <span class="ident">__init__</span></span>(<span>self, starting_mass, prey_data, temp_fn, bathymetry_fn, day_hours, light_extinction, params=&lt;bioenergetics.params.Chinook object at 0x7f09f3b1cc50&gt;, depth_max=10000, depth_min=-1, day_light=39350, night_light=0.1, surface_elevation=100000, allow_dvm=True, max_P=1.0)</span>
 </code></dt>
 <dd>
 <section class="desc"><p>Constructor method</p>
@@ -1439,14 +1530,14 @@ optimize the fish's growth during that period.</p></section>
 <dt><strong><code>starting_mass</code></strong></dt>
 <dd>The starting mass of the fish in grams.</dd>
 <dt><strong><code>prey_data</code></strong></dt>
-<dd>A <code>bioenergetics.prey.PreyData</code> instance.</dd>
+<dd>A <a title="bioenergetics.prey.PreyData" href="prey.html#bioenergetics.prey.PreyData"><code>PreyData</code></a> instance.</dd>
 <dt><strong><code>temp_fn</code></strong></dt>
-<dd>A <code>bioenergetics.model.InterpolatedFunction</code>
+<dd>A <a title="bioenergetics.model.InterpolatedFunction" href="#bioenergetics.model.InterpolatedFunction"><code>InterpolatedFunction</code></a>
 instance representing temperature in degrees C as a function of
 depth in meters.</dd>
 <dt><strong><code>bathymetry_fn</code></strong></dt>
 <dd>An instance of
-<code>bioenergetics.model.InterpolatedFunction</code>
+<a title="bioenergetics.model.InterpolatedFunction" href="#bioenergetics.model.InterpolatedFunction"><code>InterpolatedFunction</code></a>
 representing surface area in meters^2 as a function of
 elevation in meters.</dd>
 <dt><strong><code>day_hours</code></strong></dt>
@@ -1454,9 +1545,9 @@ elevation in meters.</dd>
 <dt><strong><code>light_extinction</code></strong></dt>
 <dd>The light extinction coefficient.</dd>
 <dt><strong><code>params</code></strong></dt>
-<dd>An optional <code>bioenergetics.params.FishParameters</code> instance
+<dd>An optional <a title="bioenergetics.params.FishParameters" href="params.html#bioenergetics.params.FishParameters"><code>FishParameters</code></a> instance
 containing the parameters for the fish species being modeled.
-Defaults to an instance of <code>bioenergetics.params.Chinook</code>.</dd>
+Defaults to an instance of <a title="bioenergetics.params.Chinook" href="params.html#bioenergetics.params.Chinook"><code>Chinook</code></a>.</dd>
 <dt><strong><code>depth_max</code></strong></dt>
 <dd>An optional numeric value that caps the maximum
 simulated depth. If no value is given, this is equal the
@@ -1467,7 +1558,7 @@ simulated depth. If no value is given, this is equal the
 minimum <code>domain</code> value of <code>temp_fn</code></dd>
 <dt><strong><code>day_light</code></strong></dt>
 <dd>An optional numeric value specifying the surface light
-intensity during day time, in lux. Defaults to 850.</dd>
+intensity during day time, in lux. Defaults to 39350.</dd>
 <dt><strong><code>night_light</code></strong></dt>
 <dd>An optional numeric value specifying the surface light
 intensity during night time, in lux. Defaults to 0.1.</dd>
@@ -1475,13 +1566,20 @@ intensity during night time, in lux. Defaults to 0.1.</dd>
 <dd>An optional numeric value specifying the
 elevation of the water's surface in meters. If not given,
 this is derived from the the <code>domain</code> value of <code>bathymetry_fn</code>.</dd>
+<dt><strong><code>allow_dvm</code></strong></dt>
+<dd>An optional boolean parameter that allows the fish to
+perform diel vertical migration, selecting different depths for
+day and night time periods. Defaults to true.</dd>
+<dt><strong><code>max_P</code></strong></dt>
+<dd>An optional numeric parameter that caps the proportion of
+maximum consumption that is allowed. Defaults to 1.0</dd>
 </dl></section>
 <details class="source">
 <summary>Source code</summary>
 <pre><code class="python">def __init__(self, starting_mass, prey_data, temp_fn, bathymetry_fn,
              day_hours, light_extinction, params=params.Chinook(),
-             depth_max=10000, depth_min=-1, day_light=850, night_light=0.1,
-             surface_elevation=100000):
+             depth_max=10000, depth_min=-1, day_light=39350, night_light=0.1,
+             surface_elevation=100000, allow_dvm=True, max_P=1.0):
     &#34;&#34;&#34;Constructor method
 
     Args:
@@ -1506,12 +1604,17 @@ this is derived from the the <code>domain</code> value of <code>bathymetry_fn</c
             simulated depth. If no value is given, this is equal the
             minimum `domain` value of `temp_fn`
         day_light: An optional numeric value specifying the surface light
-            intensity during day time, in lux. Defaults to 850.
+            intensity during day time, in lux. Defaults to 39350.
         night_light: An optional numeric value specifying the surface light
             intensity during night time, in lux. Defaults to 0.1.
         surface_elevation: An optional numeric value specifying the
             elevation of the water&#39;s surface in meters. If not given,
             this is derived from the the `domain` value of `bathymetry_fn`.
+        allow_dvm: An optional boolean parameter that allows the fish to
+            perform diel vertical migration, selecting different depths for
+            day and night time periods. Defaults to true.
+        max_P: An optional numeric parameter that caps the proportion of
+            maximum consumption that is allowed. Defaults to 1.0
     &#34;&#34;&#34;
     self.prey_data = prey_data
     self.light_extinction = light_extinction
@@ -1530,10 +1633,12 @@ this is derived from the the <code>domain</code> value of <code>bathymetry_fn</c
 
     self.starting_length = params.length_from_weight(self.starting_mass)
     self.temp_from_depth = temp_fn
-    self.area_from_elevation = bathymetry_fn</code></pre>
+    self.area_from_elevation = bathymetry_fn
+    self.allow_dvm = allow_dvm
+    self.max_P = max_P</code></pre>
 </details>
 </dd>
-<dt id="bioenergetics..model.Model.best_depth"><code class="name flex">
+<dt id="bioenergetics.model.Model.best_depth"><code class="name flex">
 <span>def <span class="ident">best_depth</span></span>(<span>self, length, mass, x0=None)</span>
 </code></dt>
 <dd>
@@ -1564,7 +1669,7 @@ night-time depths which produced the optimal growth.</dd>
 <dt><strong><code>best_results</code></strong></dt>
 <dd>Growth and bioenergetics rates corresponding
 to the optimized depths, identical to the output of
-<code>bioenergetics.model.Model.growth_fn</code>.</dd>
+<a title="bioenergetics.model.Model.growth_fn" href="#bioenergetics.model.Model.growth_fn"><code>Model.growth_fn()</code></a>.</dd>
 </dl></section>
 <details class="source">
 <summary>Source code</summary>
@@ -1597,28 +1702,43 @@ to the optimized depths, identical to the output of
     day_hours = self.day_hours
     night_hours = 24.0 - day_hours
 
-    def objective(x):
-        (day_depth,night_depth) = x
-        res = self.growth_fn(day_depth, night_depth, length,
-                             mass, day_hours, night_hours)
-        return -res[0]
-    depth_bounds = (self.depth_min, self.depth_max)
+    if self.allow_dvm:
+        depth_bounds = ((self.depth_min, self.depth_max),
+                        (self.depth_min, self.depth_max))
+
+        def objective(depth_pair):
+            (day_depth, night_depth) = depth_pair
+            res = self.growth_fn(day_depth, night_depth, length,
+                                 mass, day_hours, night_hours)
+            return -res[0]
+    else:
+        depth_bounds = ((self.depth_min, self.depth_max),)
+
+        def objective(d):
+            res = self.growth_fn(d, d, length,
+                                 mass, day_hours, night_hours)
+            return -res[0]
+
     if x0 is None:
         # find an initial guess via grid search
-        x0 = brute(objective, (depth_bounds, depth_bounds))
-    res = minimize(objective, x0=x0,
-                   method=&#39;L-BFGS-B&#39;,
-                   bounds=[(self.depth_min, self.depth_max),
-                           (self.depth_min, self.depth_max)],
-                   jac=&#39;2-point&#39;, options={&#39;eps&#39;: 1e-3})
-    best_depths = res.x
+        x0 = brute(objective, depth_bounds)
+    elif not self.allow_dvm:
+        x0 = [x0[0]]
+
+    res = minimize(objective, x0=x0, method=&#39;L-BFGS-B&#39;,
+                   bounds=depth_bounds, jac=&#39;2-point&#39;,
+                   options={&#39;eps&#39;: 1e-3})
+    if self.allow_dvm:
+        best_depths = res.x
+    else:
+        best_depths = (res.x[0], res.x[0])
     (day_depth, night_depth) = best_depths
     best_results = self.growth_fn(day_depth, night_depth, length,
                                   mass, day_hours, night_hours)
     return best_depths,  best_results</code></pre>
 </details>
 </dd>
-<dt id="bioenergetics..model.Model.compute_bioenergetics"><code class="name flex">
+<dt id="bioenergetics.model.Model.compute_bioenergetics"><code class="name flex">
 <span>def <span class="ident">compute_bioenergetics</span></span>(<span>self, W, temp, P)</span>
 </code></dt>
 <dd>
@@ -1658,7 +1778,7 @@ to the optimized depths, identical to the output of
     return (consumption, egestion, excretion, respiration, SDAction)</code></pre>
 </details>
 </dd>
-<dt id="bioenergetics..model.Model.compute_cmax"><code class="name flex">
+<dt id="bioenergetics.model.Model.compute_cmax"><code class="name flex">
 <span>def <span class="ident">compute_cmax</span></span>(<span>self, W)</span>
 </code></dt>
 <dd>
@@ -1686,7 +1806,7 @@ to the optimized depths, identical to the output of
     return CA * (W ** CB)</code></pre>
 </details>
 </dd>
-<dt id="bioenergetics..model.Model.compute_foragingbydepth"><code class="name flex">
+<dt id="bioenergetics.model.Model.compute_foragingbydepth"><code class="name flex">
 <span>def <span class="ident">compute_foragingbydepth</span></span>(<span>self, length, mass, surface_light, depth)</span>
 </code></dt>
 <dd>
@@ -1730,19 +1850,16 @@ Gregory and Northcote 1992.</p>
     lightenergy = light/51.2
 
     # Note that reaction distance is in cm
-    if lightenergy &lt; 1.045:
-        reactiondistance = 1.1
-    if lightenergy &gt;= 1.045:
-        suspendedsediment = -((np.log10(lightenergy) - 1.045)/(.0108))
-        if suspendedsediment &lt;= 0:
-            reactiondistance = 31.64
-        if suspendedsediment &gt; 0:
-            turbidity = .96*np.log10(suspendedsediment+1) - .002
-            reactiondistance = (31.64-13.31*turbidity)
-        # ~1.1 from this paper, 8 based on kokanee (is ~ the
-        # median observed for this Chinook study)
-        if reactiondistance &lt; 1.1:
-            reactiondistance = 1.1
+    suspendedsediment = -((np.log10(lightenergy) - 1.045)/(.0108))
+    if suspendedsediment &lt;= 0:
+        reactiondistance = 31.64
+    else:
+        turbidity = .96*np.log10(suspendedsediment+1) - .002
+        reactiondistance = (31.64-13.31*turbidity)
+
+    # ~1.1 from this paper, 8 based on kokanee (is ~ the
+    # median observed for this Chinook study)
+    reactiondistance = max(reactiondistance, 1.1)
     swim_speed = self.params.swim_speed * length/10
     searchvolume = np.pi * (reactiondistance ** 2) * swim_speed
     # prey per hour
@@ -1755,16 +1872,18 @@ Gregory and Northcote 1992.</p>
     # the 29.858 cap
     max_er = (29.858 * (prey_density * 1000) *
               ((4.271 + prey_density * 1000) ** (-1)) * 60)
+    #print(encounter_rate, max_er)
     if encounter_rate &gt; max_er:
         encounter_rate = max_er
 
+
     # use if want to further restrict capture
     # encounter_rate = 0.9 * encounter_rate
-    gramsER = encounter_rate * self.prey_data.weight
+    gramsER = encounter_rate * self.prey_data.wet_weight
     return gramsER / mass</code></pre>
 </details>
 </dd>
-<dt id="bioenergetics..model.Model.compute_ft"><code class="name flex">
+<dt id="bioenergetics.model.Model.compute_ft"><code class="name flex">
 <span>def <span class="ident">compute_ft</span></span>(<span>self, temperature)</span>
 </code></dt>
 <dd>
@@ -1816,7 +1935,7 @@ coefficient of consumption.</p></section>
         raise ValueError(&#34;Unknown consumption equation type: &#34; + eq)</code></pre>
 </details>
 </dd>
-<dt id="bioenergetics..model.Model.compute_growth"><code class="name flex">
+<dt id="bioenergetics.model.Model.compute_growth"><code class="name flex">
 <span>def <span class="ident">compute_growth</span></span>(<span>self, w, egain)</span>
 </code></dt>
 <dd>
@@ -1872,7 +1991,7 @@ coefficient of consumption.</p></section>
             return w_new - w</code></pre>
 </details>
 </dd>
-<dt id="bioenergetics..model.Model.compute_respiration"><code class="name flex">
+<dt id="bioenergetics.model.Model.compute_respiration"><code class="name flex">
 <span>def <span class="ident">compute_respiration</span></span>(<span>self, W, temperature)</span>
 </code></dt>
 <dd>
@@ -1917,8 +2036,8 @@ coefficient of consumption.</p></section>
                   &#34;TEMPERATURES OVER 25C!&#34;)
         else:
             VEL = ACT * (W ** RK4) * np.exp(BACT * temperature)
-            FTmetabolism = np.exp(RQ * temperature)
-            activity = np.exp(RTO * VEL)
+        FTmetabolism = np.exp(RQ * temperature)
+        activity = np.exp(RTO * VEL)
     elif eq == 2:
         Vresp = (RTM - temperature) / (RTM - RTO)
         Zresp = np.log(RQ) * (RTM - RTO)
@@ -1931,7 +2050,7 @@ coefficient of consumption.</p></section>
     return (RA * (W ** RB) * FTmetabolism * activity)</code></pre>
 </details>
 </dd>
-<dt id="bioenergetics..model.Model.compute_waste"><code class="name flex">
+<dt id="bioenergetics.model.Model.compute_waste"><code class="name flex">
 <span>def <span class="ident">compute_waste</span></span>(<span>self, consumption, P, temperature)</span>
 </code></dt>
 <dd>
@@ -1993,7 +2112,7 @@ and excretion (nitrogenous waste) rates in grams/gram/day.</p></section>
         raise ValueError(&#34;Unknown egestion/excretion equation type: &#34; + eq)</code></pre>
 </details>
 </dd>
-<dt id="bioenergetics..model.Model.energy_density"><code class="name flex">
+<dt id="bioenergetics.model.Model.energy_density"><code class="name flex">
 <span>def <span class="ident">energy_density</span></span>(<span>self, W)</span>
 </code></dt>
 <dd>
@@ -2028,14 +2147,14 @@ and excretion (nitrogenous waste) rates in grams/gram/day.</p></section>
         return alpha + beta*W</code></pre>
 </details>
 </dd>
-<dt id="bioenergetics..model.Model.growth_fn"><code class="name flex">
+<dt id="bioenergetics.model.Model.growth_fn"><code class="name flex">
 <span>def <span class="ident">growth_fn</span></span>(<span>self, day_depth, night_depth, length, mass, day_hours, night_hours)</span>
 </code></dt>
 <dd>
 <section class="desc"><p>Growth over a 24-hour period.</p>
 <p>This function computes growth for a fish of given size,
 located at given day- and night-time depths. It is used as an
-optimization target in the <code>bioenergetics.model.Model.best_depth</code>
+optimization target in the <a title="bioenergetics.model.Model.best_depth" href="#bioenergetics.model.Model.best_depth"><code>Model.best_depth()</code></a>
 method.</p>
 <h2 id="args">Args</h2>
 <dl>
@@ -2105,12 +2224,12 @@ respiration, SDAction, P, day_P, night_P)</code></p>
                                                   night_depth)
     if day_foraging &gt; night_foraging:
         day_foraging *= day_hours
-        day_P = min(day_foraging/cmax, 1)
-        night_P = min(1.0 - day_P, night_foraging*night_hours)
+        day_P = min(day_foraging/cmax, self.max_P)
+        night_P = min(self.max_P - day_P, night_foraging*night_hours)
     else:
         night_foraging *= night_hours
-        night_P = min(night_foraging/cmax, 1.0)
-        day_P = min(1.0 - night_P, day_foraging*day_hours)
+        night_P = min(night_foraging/cmax, self.max_P)
+        day_P = min(self.max_P - night_P, day_foraging*day_hours)
 
     day_bioe = self.compute_bioenergetics(mass, day_temp, day_P)
     night_bioe = self.compute_bioenergetics(mass, night_temp, night_P)
@@ -2128,26 +2247,33 @@ respiration, SDAction, P, day_P, night_P)</code></p>
             SDAction, P, day_P, night_P)</code></pre>
 </details>
 </dd>
-<dt id="bioenergetics..model.Model.run"><code class="name flex">
-<span>def <span class="ident">run</span></span>(<span>self, n_days=30)</span>
+<dt id="bioenergetics.model.Model.run"><code class="name flex">
+<span>def <span class="ident">run</span></span>(<span>self, n_days=30, start_date=None)</span>
 </code></dt>
 <dd>
 <section class="desc"><p>Simulate fish growth over a period of several days.</p>
 <p>Beginning with a fish with a mass equal to
 <code>bioenergetics.model.Model.starting_mass</code>, call
-<code>bioenergetics.model.Model.best_depth</code> for each day, updating
+<a title="bioenergetics.model.Model.best_depth" href="#bioenergetics.model.Model.best_depth"><code>Model.best_depth()</code></a> for each day, updating
 the fish's mass each time.</p>
 <h2 id="args">Args</h2>
 <dl>
 <dt><strong><code>n_days</code></strong></dt>
 <dd>An optional parameter specifying the number of days
 to simulate. Defaults to 30.</dd>
+<dt><strong><code>start_date</code></strong></dt>
+<dd>An optional parameter specifying the start date of
+the simulation. Accepts either a <code>datetime.date</code> object or a
+3-element tuple containing <code>(year, month, day)</code></dd>
 </dl>
 <h2 id="returns">Returns</h2>
 <p>A dictionary containing simulation outputs. Each entry is a
 list with <code>n_days</code> elements, corresponding to the values from
 each day. The output contains the following keys:</p>
 <dl>
+<dt><strong><code>date</code></strong></dt>
+<dd>If <code>start_date</code> is given, a date string in ISO format
+(YYYY-MM-DD), otherwise an integer index starting at 1.</dd>
 <dt><strong><code>mass</code></strong></dt>
 <dd>The mass of the fish in grams at the end of each day.</dd>
 <dt><strong><code>length</code></strong></dt>
@@ -2174,10 +2300,15 @@ each day. The output contains the following keys:</p>
 <dd>The temperature corresponding to <code>day_depth</code>.</dd>
 <dt><strong><code>night_temperature</code></strong></dt>
 <dd>The temperature corresponding to <code>night_depth</code>.</dd>
+</dl>
+<h2 id="raises">Raises</h2>
+<dl>
+<dt><strong><code>AssertionError</code></strong></dt>
+<dd>n_days is not a positive integer</dd>
 </dl></section>
 <details class="source">
 <summary>Source code</summary>
-<pre><code class="python">def run(self, n_days=30):
+<pre><code class="python">def run(self, n_days=30, start_date=None):
     &#34;&#34;&#34;Simulate fish growth over a period of several days.
 
     Beginning with a fish with a mass equal to
@@ -2188,12 +2319,17 @@ each day. The output contains the following keys:</p>
     Args:
         n_days: An optional parameter specifying the number of days
             to simulate. Defaults to 30.
+        start_date: An optional parameter specifying the start date of
+            the simulation. Accepts either a `datetime.date` object or a
+            3-element tuple containing `(year, month, day)`
 
     Returns:
         A dictionary containing simulation outputs. Each entry is a
         list with `n_days` elements, corresponding to the values from
         each day. The output contains the following keys:
 
+        date: If `start_date` is given, a date string in ISO format
+            (YYYY-MM-DD), otherwise an integer index starting at 1.
         mass: The mass of the fish in grams at the end of each day.
         length: The length of fish in millimeters at the end of each day.
         day_depth: The daytime depth of the fish in meters.
@@ -2208,6 +2344,9 @@ each day. The output contains the following keys:</p>
         day_temperature: The temperature corresponding to `day_depth`.
         night_temperature: The temperature corresponding to `night_depth`.
 
+    Raises:
+        AssertionError: n_days is not a positive integer
+
     &#34;&#34;&#34;
     assert (n_days &gt;= 1), &#34;n_days must be a positive integer&#34;
 
@@ -2217,6 +2356,12 @@ each day. The output contains the following keys:</p>
     last_best_depths = None
     length = self.starting_length
     mass = self.starting_mass
+
+    use_date = (start_date is not None)
+    if use_date and not isinstance(start_date, date):
+        start_date = date(*start_date)
+    ONE_DAY = timedelta(days=1)
+
     for d in range(n_days):
         best_depths, best_results = self.best_depth(length, mass,
                                                     last_best_depths)
@@ -2226,30 +2371,40 @@ each day. The output contains the following keys:</p>
          respiration, SDAction, P, day_P, night_P) = best_results
         day_temp = self.temp_from_depth(day_depth)
         night_temp = self.temp_from_depth(night_depth)
-        dailyconsume = (consumption*mass) / self.prey_data.weight
+        dailyconsume = (consumption*mass) / self.prey_data.wet_weight
         mass += growth
         if growth &gt; 0:
             length = self.params.length_from_weight(mass)
+
+        if use_date:
+            datestamp = (start_date + ONE_DAY*d).isoformat()
+            out[&#39;date&#39;].append(datestamp)
+        else:
+            out[&#39;date&#39;].append(int(d+1))
         out[&#39;day_depth&#39;].append(day_depth)
         out[&#39;night_depth&#39;].append(night_depth)
         out[&#39;growth&#39;].append(growth)
-        out[&#39;Mass&#39;].append(mass)
-        out[&#39;Length&#39;].append(length)
+        out[&#39;mass&#39;].append(mass)
+        out[&#39;length&#39;].append(length)
         out[&#39;egestion&#39;].append(egestion)
         out[&#39;excretion&#39;].append(excretion)
         out[&#39;consumption&#39;].append(consumption)
-        out[&#39;P&#39;].append(P)
+        out[&#39;p&#39;].append(P)
         out[&#39;day_temperature&#39;].append(day_temp)
         out[&#39;night_temperature&#39;].append(night_temp)
         out[&#39;day_P&#39;].append(day_P)
         out[&#39;night_P&#39;].append(night_P)
+
+        # early stopping condition
+        if mass &lt; 0:
+            break
 
     PopEst = self.sustainability_estimate(day_depth, dailyconsume)
     condition = float(100*(mass-self.starting_mass)*((length/10)**(-3.0)))
     return (out, dailyconsume, condition, condition1, PopEst, day_P, night_P)</code></pre>
 </details>
 </dd>
-<dt id="bioenergetics..model.Model.sustainability_estimate"><code class="name flex">
+<dt id="bioenergetics.model.Model.sustainability_estimate"><code class="name flex">
 <span>def <span class="ident">sustainability_estimate</span></span>(<span>self, depth, consumed)</span>
 </code></dt>
 <dd>
@@ -2300,38 +2455,38 @@ given depth.</p>
 <ul id="index">
 <li><h3>Super-module</h3>
 <ul>
-<li><code><a title="bioenergetics." href="index.html">bioenergetics.</a></code></li>
+<li><code><a title="bioenergetics" href="index.html">bioenergetics</a></code></li>
 </ul>
 </li>
 <li><h3><a href="#header-variables">Global variables</a></h3>
 <ul class="">
-<li><code><a title="bioenergetics..model.O2CONV" href="#bioenergetics..model.O2CONV">O2CONV</a></code></li>
+<li><code><a title="bioenergetics.model.O2CONV" href="#bioenergetics.model.O2CONV">O2CONV</a></code></li>
 </ul>
 </li>
 <li><h3><a href="#header-classes">Classes</a></h3>
 <ul>
 <li>
-<h4><code><a title="bioenergetics..model.InterpolatedFunction" href="#bioenergetics..model.InterpolatedFunction">InterpolatedFunction</a></code></h4>
+<h4><code><a title="bioenergetics.model.InterpolatedFunction" href="#bioenergetics.model.InterpolatedFunction">InterpolatedFunction</a></code></h4>
 <ul class="">
-<li><code><a title="bioenergetics..model.InterpolatedFunction.__init__" href="#bioenergetics..model.InterpolatedFunction.__init__">__init__</a></code></li>
+<li><code><a title="bioenergetics.model.InterpolatedFunction.__init__" href="#bioenergetics.model.InterpolatedFunction.__init__">__init__</a></code></li>
 </ul>
 </li>
 <li>
-<h4><code><a title="bioenergetics..model.Model" href="#bioenergetics..model.Model">Model</a></code></h4>
+<h4><code><a title="bioenergetics.model.Model" href="#bioenergetics.model.Model">Model</a></code></h4>
 <ul class="">
-<li><code><a title="bioenergetics..model.Model.__init__" href="#bioenergetics..model.Model.__init__">__init__</a></code></li>
-<li><code><a title="bioenergetics..model.Model.best_depth" href="#bioenergetics..model.Model.best_depth">best_depth</a></code></li>
-<li><code><a title="bioenergetics..model.Model.compute_bioenergetics" href="#bioenergetics..model.Model.compute_bioenergetics">compute_bioenergetics</a></code></li>
-<li><code><a title="bioenergetics..model.Model.compute_cmax" href="#bioenergetics..model.Model.compute_cmax">compute_cmax</a></code></li>
-<li><code><a title="bioenergetics..model.Model.compute_foragingbydepth" href="#bioenergetics..model.Model.compute_foragingbydepth">compute_foragingbydepth</a></code></li>
-<li><code><a title="bioenergetics..model.Model.compute_ft" href="#bioenergetics..model.Model.compute_ft">compute_ft</a></code></li>
-<li><code><a title="bioenergetics..model.Model.compute_growth" href="#bioenergetics..model.Model.compute_growth">compute_growth</a></code></li>
-<li><code><a title="bioenergetics..model.Model.compute_respiration" href="#bioenergetics..model.Model.compute_respiration">compute_respiration</a></code></li>
-<li><code><a title="bioenergetics..model.Model.compute_waste" href="#bioenergetics..model.Model.compute_waste">compute_waste</a></code></li>
-<li><code><a title="bioenergetics..model.Model.energy_density" href="#bioenergetics..model.Model.energy_density">energy_density</a></code></li>
-<li><code><a title="bioenergetics..model.Model.growth_fn" href="#bioenergetics..model.Model.growth_fn">growth_fn</a></code></li>
-<li><code><a title="bioenergetics..model.Model.run" href="#bioenergetics..model.Model.run">run</a></code></li>
-<li><code><a title="bioenergetics..model.Model.sustainability_estimate" href="#bioenergetics..model.Model.sustainability_estimate">sustainability_estimate</a></code></li>
+<li><code><a title="bioenergetics.model.Model.__init__" href="#bioenergetics.model.Model.__init__">__init__</a></code></li>
+<li><code><a title="bioenergetics.model.Model.best_depth" href="#bioenergetics.model.Model.best_depth">best_depth</a></code></li>
+<li><code><a title="bioenergetics.model.Model.compute_bioenergetics" href="#bioenergetics.model.Model.compute_bioenergetics">compute_bioenergetics</a></code></li>
+<li><code><a title="bioenergetics.model.Model.compute_cmax" href="#bioenergetics.model.Model.compute_cmax">compute_cmax</a></code></li>
+<li><code><a title="bioenergetics.model.Model.compute_foragingbydepth" href="#bioenergetics.model.Model.compute_foragingbydepth">compute_foragingbydepth</a></code></li>
+<li><code><a title="bioenergetics.model.Model.compute_ft" href="#bioenergetics.model.Model.compute_ft">compute_ft</a></code></li>
+<li><code><a title="bioenergetics.model.Model.compute_growth" href="#bioenergetics.model.Model.compute_growth">compute_growth</a></code></li>
+<li><code><a title="bioenergetics.model.Model.compute_respiration" href="#bioenergetics.model.Model.compute_respiration">compute_respiration</a></code></li>
+<li><code><a title="bioenergetics.model.Model.compute_waste" href="#bioenergetics.model.Model.compute_waste">compute_waste</a></code></li>
+<li><code><a title="bioenergetics.model.Model.energy_density" href="#bioenergetics.model.Model.energy_density">energy_density</a></code></li>
+<li><code><a title="bioenergetics.model.Model.growth_fn" href="#bioenergetics.model.Model.growth_fn">growth_fn</a></code></li>
+<li><code><a title="bioenergetics.model.Model.run" href="#bioenergetics.model.Model.run">run</a></code></li>
+<li><code><a title="bioenergetics.model.Model.sustainability_estimate" href="#bioenergetics.model.Model.sustainability_estimate">sustainability_estimate</a></code></li>
 </ul>
 </li>
 </ul>

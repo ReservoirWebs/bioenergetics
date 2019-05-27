@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
 <meta name="generator" content="pdoc 0.5.3" />
-<title>bioenergetics..params API documentation</title>
+<title>bioenergetics.params API documentation</title>
 <meta name="description" content="Fish species parameters …" />
 <link href='https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.0/normalize.min.css' rel='stylesheet'>
 <link href='https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/8.0.0/sanitize.min.css' rel='stylesheet'>
@@ -17,12 +17,12 @@
 <main>
 <article id="content">
 <header>
-<h1 class="title"><code>bioenergetics..params</code> module</h1>
+<h1 class="title"><code>bioenergetics.params</code> module</h1>
 </header>
 <section id="section-intro">
 <p>Fish species parameters</p>
 <p>Specific fish species should inherit from the
-<code>bioenergetics.params.FishParameters</code> base class.</p>
+<a title="bioenergetics.params.FishParameters" href="#bioenergetics.params.FishParameters"><code>FishParameters</code></a> base class.</p>
 <p>This file is part of GrowChinook.</p>
 <p>GrowChinook is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -204,11 +204,11 @@ class Chinook(FishParameters):
 <section>
 <h2 class="section-title" id="header-variables">Global variables</h2>
 <dl>
-<dt id="bioenergetics..params.CHINOOK_DEFAULTS"><code class="name">var <span class="ident">CHINOOK_DEFAULTS</span></code></dt>
+<dt id="bioenergetics.params.CHINOOK_DEFAULTS"><code class="name">var <span class="ident">CHINOOK_DEFAULTS</span></code></dt>
 <dd>
 <section class="desc"><p>Default bioenergetics parameters for Oncorhynchus tshawytscha.</p></section>
 </dd>
-<dt id="bioenergetics..params.KEYS"><code class="name">var <span class="ident">KEYS</span></code></dt>
+<dt id="bioenergetics.params.KEYS"><code class="name">var <span class="ident">KEYS</span></code></dt>
 <dd>
 <section class="desc"><p>Key names for wrapped parameters</p></section>
 </dd>
@@ -219,9 +219,9 @@ class Chinook(FishParameters):
 <section>
 <h2 class="section-title" id="header-classes">Classes</h2>
 <dl>
-<dt id="bioenergetics..params.Chinook"><code class="flex name class">
+<dt id="bioenergetics.params.Chinook"><code class="flex name class">
 <span>class <span class="ident">Chinook</span></span>
-<span>(</span><span><small>ancestors:</small> <a title="bioenergetics..params.FishParameters" href="#bioenergetics..params.FishParameters">FishParameters</a>)</span>
+<span>(</span><span><small>ancestors:</small> <a title="bioenergetics.params.FishParameters" href="#bioenergetics.params.FishParameters">FishParameters</a>)</span>
 </code></dt>
 <dd>
 <section class="desc"><p>Parameters for Oncorhynchus tshawytscha.</p>
@@ -279,7 +279,7 @@ Defaults to "murphy"</dd>
 </details>
 <h3>Methods</h3>
 <dl>
-<dt id="bioenergetics..params.Chinook.length_from_weight"><code class="name flex">
+<dt id="bioenergetics.params.Chinook.length_from_weight"><code class="name flex">
 <span>def <span class="ident">length_from_weight</span></span>(<span>self, w)</span>
 </code></dt>
 <dd>
@@ -318,16 +318,16 @@ relationship is used.</p>
 </dl>
 <h3>Inherited members</h3>
 <ul class="hlist">
-<li><code><b><a title="bioenergetics..params.FishParameters" href="#bioenergetics..params.FishParameters">FishParameters</a></b></code>:
+<li><code><b><a title="bioenergetics.params.FishParameters" href="#bioenergetics.params.FishParameters">FishParameters</a></b></code>:
 <ul class="hlist">
-<li><code><a title="bioenergetics..params.FishParameters.__init__" href="#bioenergetics..params.FishParameters.__init__">__init__</a></code></li>
-<li><code><a title="bioenergetics..params.FishParameters.from_csv" href="#bioenergetics..params.FishParameters.from_csv">from_csv</a></code></li>
-<li><code><a title="bioenergetics..params.FishParameters.to_csv" href="#bioenergetics..params.FishParameters.to_csv">to_csv</a></code></li>
+<li><code><a title="bioenergetics.params.FishParameters.__init__" href="#bioenergetics.params.FishParameters.__init__">__init__</a></code></li>
+<li><code><a title="bioenergetics.params.FishParameters.from_csv" href="#bioenergetics.params.FishParameters.from_csv">from_csv</a></code></li>
+<li><code><a title="bioenergetics.params.FishParameters.to_csv" href="#bioenergetics.params.FishParameters.to_csv">to_csv</a></code></li>
 </ul>
 </li>
 </ul>
 </dd>
-<dt id="bioenergetics..params.FishParameters"><code class="flex name class">
+<dt id="bioenergetics.params.FishParameters"><code class="flex name class">
 <span>class <span class="ident">FishParameters</span></span>
 </code></dt>
 <dd>
@@ -416,11 +416,11 @@ relationship between weight and fork length.</p></section>
 </details>
 <h3>Subclasses</h3>
 <ul class="hlist">
-<li><a title="bioenergetics..params.Chinook" href="#bioenergetics..params.Chinook">Chinook</a></li>
+<li><a title="bioenergetics.params.Chinook" href="#bioenergetics.params.Chinook">Chinook</a></li>
 </ul>
 <h3>Methods</h3>
 <dl>
-<dt id="bioenergetics..params.FishParameters.__init__"><code class="name flex">
+<dt id="bioenergetics.params.FishParameters.__init__"><code class="name flex">
 <span>def <span class="ident">__init__</span></span>(<span>self, params={}, *args, **kwargs)</span>
 </code></dt>
 <dd>
@@ -429,7 +429,7 @@ relationship between weight and fork length.</p></section>
 <dl>
 <dt><strong><code>params</code></strong></dt>
 <dd>A dictionary containing the keys found in
-<code>bioenergetics.params.KEYS</code>.</dd>
+<a title="bioenergetics.params.KEYS" href="#bioenergetics.params.KEYS"><code>KEYS</code></a>.</dd>
 </dl>
 <h2 id="returns">Returns</h2>
 <p>The initialized FishParameters instance.</p></section>
@@ -456,7 +456,7 @@ relationship between weight and fork length.</p></section>
         &#34;Consumption equation (c_eq) must be 1, 2, or 3.&#34;</code></pre>
 </details>
 </dd>
-<dt id="bioenergetics..params.FishParameters.from_csv"><code class="name flex">
+<dt id="bioenergetics.params.FishParameters.from_csv"><code class="name flex">
 <span>def <span class="ident">from_csv</span></span>(<span>self, filename)</span>
 </code></dt>
 <dd>
@@ -470,7 +470,7 @@ relationship between weight and fork length.</p></section>
         self.params = next(reader)</code></pre>
 </details>
 </dd>
-<dt id="bioenergetics..params.FishParameters.length_from_weight"><code class="name flex">
+<dt id="bioenergetics.params.FishParameters.length_from_weight"><code class="name flex">
 <span>def <span class="ident">length_from_weight</span></span>(<span>self, w)</span>
 </code></dt>
 <dd>
@@ -485,7 +485,7 @@ Should be implemented by subclasses.</p></section>
     pass</code></pre>
 </details>
 </dd>
-<dt id="bioenergetics..params.FishParameters.to_csv"><code class="name flex">
+<dt id="bioenergetics.params.FishParameters.to_csv"><code class="name flex">
 <span>def <span class="ident">to_csv</span></span>(<span>self, filename)</span>
 </code></dt>
 <dd>
@@ -527,30 +527,30 @@ Should be implemented by subclasses.</p></section>
 <ul id="index">
 <li><h3>Super-module</h3>
 <ul>
-<li><code><a title="bioenergetics." href="index.html">bioenergetics.</a></code></li>
+<li><code><a title="bioenergetics" href="index.html">bioenergetics</a></code></li>
 </ul>
 </li>
 <li><h3><a href="#header-variables">Global variables</a></h3>
 <ul class="">
-<li><code><a title="bioenergetics..params.CHINOOK_DEFAULTS" href="#bioenergetics..params.CHINOOK_DEFAULTS">CHINOOK_DEFAULTS</a></code></li>
-<li><code><a title="bioenergetics..params.KEYS" href="#bioenergetics..params.KEYS">KEYS</a></code></li>
+<li><code><a title="bioenergetics.params.CHINOOK_DEFAULTS" href="#bioenergetics.params.CHINOOK_DEFAULTS">CHINOOK_DEFAULTS</a></code></li>
+<li><code><a title="bioenergetics.params.KEYS" href="#bioenergetics.params.KEYS">KEYS</a></code></li>
 </ul>
 </li>
 <li><h3><a href="#header-classes">Classes</a></h3>
 <ul>
 <li>
-<h4><code><a title="bioenergetics..params.Chinook" href="#bioenergetics..params.Chinook">Chinook</a></code></h4>
+<h4><code><a title="bioenergetics.params.Chinook" href="#bioenergetics.params.Chinook">Chinook</a></code></h4>
 <ul class="">
-<li><code><a title="bioenergetics..params.Chinook.length_from_weight" href="#bioenergetics..params.Chinook.length_from_weight">length_from_weight</a></code></li>
+<li><code><a title="bioenergetics.params.Chinook.length_from_weight" href="#bioenergetics.params.Chinook.length_from_weight">length_from_weight</a></code></li>
 </ul>
 </li>
 <li>
-<h4><code><a title="bioenergetics..params.FishParameters" href="#bioenergetics..params.FishParameters">FishParameters</a></code></h4>
+<h4><code><a title="bioenergetics.params.FishParameters" href="#bioenergetics.params.FishParameters">FishParameters</a></code></h4>
 <ul class="">
-<li><code><a title="bioenergetics..params.FishParameters.__init__" href="#bioenergetics..params.FishParameters.__init__">__init__</a></code></li>
-<li><code><a title="bioenergetics..params.FishParameters.from_csv" href="#bioenergetics..params.FishParameters.from_csv">from_csv</a></code></li>
-<li><code><a title="bioenergetics..params.FishParameters.length_from_weight" href="#bioenergetics..params.FishParameters.length_from_weight">length_from_weight</a></code></li>
-<li><code><a title="bioenergetics..params.FishParameters.to_csv" href="#bioenergetics..params.FishParameters.to_csv">to_csv</a></code></li>
+<li><code><a title="bioenergetics.params.FishParameters.__init__" href="#bioenergetics.params.FishParameters.__init__">__init__</a></code></li>
+<li><code><a title="bioenergetics.params.FishParameters.from_csv" href="#bioenergetics.params.FishParameters.from_csv">from_csv</a></code></li>
+<li><code><a title="bioenergetics.params.FishParameters.length_from_weight" href="#bioenergetics.params.FishParameters.length_from_weight">length_from_weight</a></code></li>
+<li><code><a title="bioenergetics.params.FishParameters.to_csv" href="#bioenergetics.params.FishParameters.to_csv">to_csv</a></code></li>
 </ul>
 </li>
 </ul>

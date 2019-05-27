@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
 <meta name="generator" content="pdoc 0.5.3" />
-<title>bioenergetics..util API documentation</title>
+<title>bioenergetics.util API documentation</title>
 <meta name="description" content="" />
 <link href='https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.0/normalize.min.css' rel='stylesheet'>
 <link href='https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/8.0.0/sanitize.min.css' rel='stylesheet'>
@@ -17,26 +17,35 @@
 <main>
 <article id="content">
 <header>
-<h1 class="title"><code>bioenergetics..util</code> module</h1>
+<h1 class="title"><code>bioenergetics.util</code> module</h1>
 </header>
 <section id="section-intro">
 <details class="source">
 <summary>Source code</summary>
-<pre><code class="python">from scipy.interpolate import interp1d
+<pre><code class="python">from csv import DictReader, DictWriter
+import json
+import os
+
+from scipy.interpolate import interp1d
 from scipy.integrate import trapz
 import numpy as np
-from csv import DictReader
+from matplotlib import pyplot
 
 
-def select_rows(csvfile, site, month, year):
+def select_rows(csvfile, x_key, y_key, site=None, month=None, year=None):
     &#34;&#34;&#34;From an input csv file, select rows for a given site and season.&#34;&#34;&#34;
+
+    site = site and str(site)
+    month = month and str(month)
+    year = year and str(year)
     with open(csvfile) as fid:
         reader = DictReader(fid)
-        rows = [r for r in reader if (r[&#39;Site&#39;] == site
-                                      and r[&#39;Month&#39;] == month
-                                      and r[&#39;Year&#39;] == year)]
-        x = [float(r[&#39;Depth&#39;]) for r in rows]
-        y = [float(r[&#39;Total Daphnia&#39;]) for r in rows]
+        rows = [r for r in reader
+                if ((site is None or r[&#39;site&#39;].lower() == site.lower())
+                    and (month is None or r[&#39;month&#39;].lower() == month.lower())
+                    and (year is None or r[&#39;year&#39;] == year))]
+        x = [float(r[x_key]) for r in rows]
+        y = [float(r[y_key]) for r in rows]
         return (x, y)
 
 
@@ -93,7 +102,99 @@ def interpolated_function(x, y, clip_max=None, clip_min=None):
         x = x[idx]
         y = y[idx]
 
-    return interp1d(x, y, bounds_error=False, fill_value=(y[0], y[-1]))</code></pre>
+    return interp1d(x, y, bounds_error=False, fill_value=(y[0], y[-1]))
+
+
+def transpose_dict(d):
+    &#34;&#34;&#34;Convert a dictionary of lists to a list of dictionaries.&#34;&#34;&#34;
+    ks = d.keys()
+    vs = list(d.values())
+    n = len(vs[0])
+    transposed = [dict() for i in range(n)]
+    for i in range(n):
+        for k in ks:
+            transposed[i][k] = d[k][i]
+    return transposed
+
+
+def export_results(results, filename, fmt=None, extra_columns=None):
+    &#34;&#34;&#34;Write model outputs to file
+
+    Args:
+        results: A dictionary containing the output from
+            `bioenergetics.model.Model.run`.
+        filename: A string containing the path to the output file.
+        fmt: An optional string specifying the format of the output file.
+            Should be either &#39;json&#39; or &#39;csv&#39;. If not given, will try to
+            guess from the filename extension, defaulting to &#39;csv&#39; for
+            unrecognized extensions.
+
+    Raises:
+        AssertionError: when an unrecognized value is passed to `fmt`
+        TypeError: extra_columns is not a dictionary or None
+    &#34;&#34;&#34;
+
+    if not fmt:
+        path, ext = os.path.splitext(filename)
+        if ext == &#39;json&#39;:
+            fmt = &#39;json&#39;
+        else:
+            fmt = &#39;csv&#39;
+    else:
+        assert (fmt.lower() in [&#39;json&#39;, &#39;csv&#39;]), \
+            &#39;fmt must be either &#34;json&#34; or &#34;csv&#34;&#39;
+
+    rs = results.copy()
+    if extra_columns is not None:
+        rs.update(extra_columns)
+    rs = transpose_dict(rs)
+
+    print(&#39;exporting %d rows to %s&#39; % (len(rs), filename))
+    with open(filename, &#39;w&#39;) as fid:
+        if ext.lower() == &#39;json&#39;:
+            json.dump(rs, fid)
+        else:
+            writer = DictWriter(fid, rs[0].keys())
+            writer.writeheader()
+            writer.writerows(rs)
+
+
+def plot_results(results, filename=None, title=None):
+    fig = pyplot.figure(facecolor=&#39;#c8e9b1&#39;)
+    if title is None:
+        title = &#39;Juvenile Spring Chinook&#39;
+    fig.suptitle(title, fontsize=20)
+    mass_plot = fig.add_subplot(221)
+    mass_plot.plot(results[&#39;mass&#39;], label=&#39;Mass (g)&#39;)
+    mass_plot.set_ylabel(&#39;Mass (g)&#39;)
+    mass_plot.set_xlabel(&#39;Day of Month&#39;)
+
+    growth_plot = fig.add_subplot(222)
+    growth_plot.plot(results[&#39;growth&#39;])
+    growth_plot.set_ylabel(&#39;Growth (g/g/d)&#39;)
+    growth_plot.set_xlabel(&#39;Day of Month&#39;)
+
+    day_depth_plot = fig.add_subplot(223)
+    day_depth_plot.plot(results[&#39;day_depth&#39;], &#39;black&#39;, label=&#34;Day Depth (m)&#34;)
+    day_depth_plot.set_ylabel(&#39;Day Depth (m)&#39;)
+    day_depth_plot.set_xlabel(&#39;Day of Month&#39;)
+    day_depth_plot.set_ylim(35, 0)
+    day_depth_plot.yticklabels = (np.arange(0, 35, 5))
+
+    night_depth_plot = fig.add_subplot(224)
+    night_depth_plot.set_ylabel(&#39;Night Depth (m)&#39;)
+    night_depth_plot.set_xlabel(&#39;Day of Month&#39;)
+    night_depth_plot.plot(results[&#39;night_depth&#39;], &#39;black&#39;,
+                          label=&#34;Night Depth (m)&#34;)
+    night_depth_plot.yticklabels = (np.arange(0, 35, 5))
+    night_depth_plot.set_ylim(35, 0)
+
+    pyplot.subplots_adjust(top=0.3)
+    fig.tight_layout(pad=1.08, h_pad=None, w_pad=None, rect=None)
+
+    if filename:
+        pyplot.savefig(filename, facecolor=fig.get_facecolor(),
+                       edgecolor=&#39;lightblue&#39;)</code></pre>
 </details>
 </section>
 <section>
@@ -103,7 +204,7 @@ def interpolated_function(x, y, clip_max=None, clip_min=None):
 <section>
 <h2 class="section-title" id="header-functions">Functions</h2>
 <dl>
-<dt id="bioenergetics..util.compute_curves"><code class="name flex">
+<dt id="bioenergetics.util.compute_curves"><code class="name flex">
 <span>def <span class="ident">compute_curves</span></span>(<span>depths, counts, sum_counts=None)</span>
 </code></dt>
 <dd>
@@ -130,7 +231,76 @@ the AUC = sum_counts.</p></section>
             auc)</code></pre>
 </details>
 </dd>
-<dt id="bioenergetics..util.interpolated_function"><code class="name flex">
+<dt id="bioenergetics.util.export_results"><code class="name flex">
+<span>def <span class="ident">export_results</span></span>(<span>results, filename, fmt=None, extra_columns=None)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Write model outputs to file</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>results</code></strong></dt>
+<dd>A dictionary containing the output from
+<a title="bioenergetics.model.Model.run" href="model.html#bioenergetics.model.Model.run"><code>Model.run()</code></a>.</dd>
+<dt><strong><code>filename</code></strong></dt>
+<dd>A string containing the path to the output file.</dd>
+<dt><strong><code>fmt</code></strong></dt>
+<dd>An optional string specifying the format of the output file.
+Should be either 'json' or 'csv'. If not given, will try to
+guess from the filename extension, defaulting to 'csv' for
+unrecognized extensions.</dd>
+</dl>
+<h2 id="raises">Raises</h2>
+<dl>
+<dt><strong><code>AssertionError</code></strong></dt>
+<dd>when an unrecognized value is passed to <code>fmt</code></dd>
+<dt><strong><code>TypeError</code></strong></dt>
+<dd>extra_columns is not a dictionary or None</dd>
+</dl></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">def export_results(results, filename, fmt=None, extra_columns=None):
+    &#34;&#34;&#34;Write model outputs to file
+
+    Args:
+        results: A dictionary containing the output from
+            `bioenergetics.model.Model.run`.
+        filename: A string containing the path to the output file.
+        fmt: An optional string specifying the format of the output file.
+            Should be either &#39;json&#39; or &#39;csv&#39;. If not given, will try to
+            guess from the filename extension, defaulting to &#39;csv&#39; for
+            unrecognized extensions.
+
+    Raises:
+        AssertionError: when an unrecognized value is passed to `fmt`
+        TypeError: extra_columns is not a dictionary or None
+    &#34;&#34;&#34;
+
+    if not fmt:
+        path, ext = os.path.splitext(filename)
+        if ext == &#39;json&#39;:
+            fmt = &#39;json&#39;
+        else:
+            fmt = &#39;csv&#39;
+    else:
+        assert (fmt.lower() in [&#39;json&#39;, &#39;csv&#39;]), \
+            &#39;fmt must be either &#34;json&#34; or &#34;csv&#34;&#39;
+
+    rs = results.copy()
+    if extra_columns is not None:
+        rs.update(extra_columns)
+    rs = transpose_dict(rs)
+
+    print(&#39;exporting %d rows to %s&#39; % (len(rs), filename))
+    with open(filename, &#39;w&#39;) as fid:
+        if ext.lower() == &#39;json&#39;:
+            json.dump(rs, fid)
+        else:
+            writer = DictWriter(fid, rs[0].keys())
+            writer.writeheader()
+            writer.writerows(rs)</code></pre>
+</details>
+</dd>
+<dt id="bioenergetics.util.interpolated_function"><code class="name flex">
 <span>def <span class="ident">interpolated_function</span></span>(<span>x, y, clip_max=None, clip_min=None)</span>
 </code></dt>
 <dd>
@@ -184,23 +354,92 @@ t3_5 = temp_fn(3.5)</p></section>
     return interp1d(x, y, bounds_error=False, fill_value=(y[0], y[-1]))</code></pre>
 </details>
 </dd>
-<dt id="bioenergetics..util.select_rows"><code class="name flex">
-<span>def <span class="ident">select_rows</span></span>(<span>csvfile, site, month, year)</span>
+<dt id="bioenergetics.util.plot_results"><code class="name flex">
+<span>def <span class="ident">plot_results</span></span>(<span>results, filename=None, title=None)</span>
+</code></dt>
+<dd>
+<section class="desc"></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">def plot_results(results, filename=None, title=None):
+    fig = pyplot.figure(facecolor=&#39;#c8e9b1&#39;)
+    if title is None:
+        title = &#39;Juvenile Spring Chinook&#39;
+    fig.suptitle(title, fontsize=20)
+    mass_plot = fig.add_subplot(221)
+    mass_plot.plot(results[&#39;mass&#39;], label=&#39;Mass (g)&#39;)
+    mass_plot.set_ylabel(&#39;Mass (g)&#39;)
+    mass_plot.set_xlabel(&#39;Day of Month&#39;)
+
+    growth_plot = fig.add_subplot(222)
+    growth_plot.plot(results[&#39;growth&#39;])
+    growth_plot.set_ylabel(&#39;Growth (g/g/d)&#39;)
+    growth_plot.set_xlabel(&#39;Day of Month&#39;)
+
+    day_depth_plot = fig.add_subplot(223)
+    day_depth_plot.plot(results[&#39;day_depth&#39;], &#39;black&#39;, label=&#34;Day Depth (m)&#34;)
+    day_depth_plot.set_ylabel(&#39;Day Depth (m)&#39;)
+    day_depth_plot.set_xlabel(&#39;Day of Month&#39;)
+    day_depth_plot.set_ylim(35, 0)
+    day_depth_plot.yticklabels = (np.arange(0, 35, 5))
+
+    night_depth_plot = fig.add_subplot(224)
+    night_depth_plot.set_ylabel(&#39;Night Depth (m)&#39;)
+    night_depth_plot.set_xlabel(&#39;Day of Month&#39;)
+    night_depth_plot.plot(results[&#39;night_depth&#39;], &#39;black&#39;,
+                          label=&#34;Night Depth (m)&#34;)
+    night_depth_plot.yticklabels = (np.arange(0, 35, 5))
+    night_depth_plot.set_ylim(35, 0)
+
+    pyplot.subplots_adjust(top=0.3)
+    fig.tight_layout(pad=1.08, h_pad=None, w_pad=None, rect=None)
+
+    if filename:
+        pyplot.savefig(filename, facecolor=fig.get_facecolor(),
+                       edgecolor=&#39;lightblue&#39;)</code></pre>
+</details>
+</dd>
+<dt id="bioenergetics.util.select_rows"><code class="name flex">
+<span>def <span class="ident">select_rows</span></span>(<span>csvfile, x_key, y_key, site=None, month=None, year=None)</span>
 </code></dt>
 <dd>
 <section class="desc"><p>From an input csv file, select rows for a given site and season.</p></section>
 <details class="source">
 <summary>Source code</summary>
-<pre><code class="python">def select_rows(csvfile, site, month, year):
+<pre><code class="python">def select_rows(csvfile, x_key, y_key, site=None, month=None, year=None):
     &#34;&#34;&#34;From an input csv file, select rows for a given site and season.&#34;&#34;&#34;
+
+    site = site and str(site)
+    month = month and str(month)
+    year = year and str(year)
     with open(csvfile) as fid:
         reader = DictReader(fid)
-        rows = [r for r in reader if (r[&#39;Site&#39;] == site
-                                      and r[&#39;Month&#39;] == month
-                                      and r[&#39;Year&#39;] == year)]
-        x = [float(r[&#39;Depth&#39;]) for r in rows]
-        y = [float(r[&#39;Total Daphnia&#39;]) for r in rows]
+        rows = [r for r in reader
+                if ((site is None or r[&#39;site&#39;].lower() == site.lower())
+                    and (month is None or r[&#39;month&#39;].lower() == month.lower())
+                    and (year is None or r[&#39;year&#39;] == year))]
+        x = [float(r[x_key]) for r in rows]
+        y = [float(r[y_key]) for r in rows]
         return (x, y)</code></pre>
+</details>
+</dd>
+<dt id="bioenergetics.util.transpose_dict"><code class="name flex">
+<span>def <span class="ident">transpose_dict</span></span>(<span>d)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Convert a dictionary of lists to a list of dictionaries.</p></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">def transpose_dict(d):
+    &#34;&#34;&#34;Convert a dictionary of lists to a list of dictionaries.&#34;&#34;&#34;
+    ks = d.keys()
+    vs = list(d.values())
+    n = len(vs[0])
+    transposed = [dict() for i in range(n)]
+    for i in range(n):
+        for k in ks:
+            transposed[i][k] = d[k][i]
+    return transposed</code></pre>
 </details>
 </dd>
 </dl>
@@ -216,14 +455,17 @@ t3_5 = temp_fn(3.5)</p></section>
 <ul id="index">
 <li><h3>Super-module</h3>
 <ul>
-<li><code><a title="bioenergetics." href="index.html">bioenergetics.</a></code></li>
+<li><code><a title="bioenergetics" href="index.html">bioenergetics</a></code></li>
 </ul>
 </li>
 <li><h3><a href="#header-functions">Functions</a></h3>
 <ul class="">
-<li><code><a title="bioenergetics..util.compute_curves" href="#bioenergetics..util.compute_curves">compute_curves</a></code></li>
-<li><code><a title="bioenergetics..util.interpolated_function" href="#bioenergetics..util.interpolated_function">interpolated_function</a></code></li>
-<li><code><a title="bioenergetics..util.select_rows" href="#bioenergetics..util.select_rows">select_rows</a></code></li>
+<li><code><a title="bioenergetics.util.compute_curves" href="#bioenergetics.util.compute_curves">compute_curves</a></code></li>
+<li><code><a title="bioenergetics.util.export_results" href="#bioenergetics.util.export_results">export_results</a></code></li>
+<li><code><a title="bioenergetics.util.interpolated_function" href="#bioenergetics.util.interpolated_function">interpolated_function</a></code></li>
+<li><code><a title="bioenergetics.util.plot_results" href="#bioenergetics.util.plot_results">plot_results</a></code></li>
+<li><code><a title="bioenergetics.util.select_rows" href="#bioenergetics.util.select_rows">select_rows</a></code></li>
+<li><code><a title="bioenergetics.util.transpose_dict" href="#bioenergetics.util.transpose_dict">transpose_dict</a></code></li>
 </ul>
 </li>
 </ul>
