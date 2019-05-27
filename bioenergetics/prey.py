@@ -54,11 +54,12 @@ class PreyData(object):
     def compute_depth_profile(self):
         x = self.depths
         y = self.counts
-        surface_count = y[np.argmin(x)]
         auc = trapz(y, x)
         y = y / auc*self.abundance
+        surface_count = y[np.argmin(x)]
+        bottom_count = y[np.argmax(x)]
         self.depth_fn = interp1d(x, y, bounds_error=False,
-                                 fill_value=surface_count)
+                                 fill_value=(surface_count, bottom_count))
 
     def prey_count(self, d):
         return self.depth_fn(d)
@@ -74,7 +75,7 @@ class DaphniaData(PreyData):
     def _init_extra(self):
         # From Koehler et. al. 2006 kJ/g
         if self.energy is None:
-            self.energy = 3976
+            self.energy = 3860
 
         # Noue and Choubert 1985 suggest Daphnia are 82.6% digestible
         # by Rainbow Trout
