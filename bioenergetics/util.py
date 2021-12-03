@@ -16,10 +16,15 @@ def select_rows(csvfile, x_key, y_key, site=None, month=None, year=None):
     year = year and str(year)
     with open(csvfile) as fid:
         reader = DictReader(fid)
-        rows = [r for r in reader
-                if ((site is None or r['site'].lower() == site.lower())
-                    and (month is None or r['month'].lower() == month.lower())
-                    and (year is None or r['year'] == year))]
+        rows = [
+            r
+            for r in reader
+            if (
+                (site is None or r["site"].lower() == site.lower())
+                and (month is None or r["month"].lower() == month.lower())
+                and (year is None or r["year"] == year)
+            )
+        ]
         x = [float(r[x_key]) for r in rows]
         y = [float(r[y_key]) for r in rows]
         return (x, y)
@@ -38,9 +43,7 @@ def compute_curves(depths, counts, sum_counts=None):
         counts = counts / auc * sum_counts
         auc = trapz(counts, depths)
 
-    return (interp1d(depths, counts,
-                     bounds_error=False, fill_value=surface_count),
-            auc)
+    return (interp1d(depths, counts, bounds_error=False, fill_value=surface_count), auc)
 
 
 def interpolated_function(x, y, clip_max=None, clip_min=None):
@@ -73,7 +76,7 @@ def interpolated_function(x, y, clip_max=None, clip_min=None):
         idx = np.logical_and(idx, (y >= clip_min))
 
     if not np.any(idx):
-        raise ValueError('Clip boundaries exclude all datapoints')
+        raise ValueError("Clip boundaries exclude all datapoints")
     else:
         x = x[idx]
         y = y[idx]
@@ -112,22 +115,21 @@ def export_results(results, filename, fmt=None, extra_columns=None):
 
     if not fmt:
         path, ext = os.path.splitext(filename)
-        if ext == 'json':
-            fmt = 'json'
+        if ext == "json":
+            fmt = "json"
         else:
-            fmt = 'csv'
+            fmt = "csv"
     else:
-        assert (fmt.lower() in ['json', 'csv']), \
-            'fmt must be either "json" or "csv"'
+        assert fmt.lower() in ["json", "csv"], 'fmt must be either "json" or "csv"'
 
     rs = results.copy()
     if extra_columns is not None:
         rs.update(extra_columns)
     rs = transpose_dict(rs)
 
-    print('exporting %d rows to %s' % (len(rs), filename))
-    with open(filename, 'w') as fid:
-        if ext.lower() == 'json':
+    print("exporting %d rows to %s" % (len(rs), filename))
+    with open(filename, "w") as fid:
+        if ext.lower() == "json":
             json.dump(rs, fid)
         else:
             writer = DictWriter(fid, rs[0].keys())
@@ -136,38 +138,36 @@ def export_results(results, filename, fmt=None, extra_columns=None):
 
 
 def plot_results(results, filename=None, title=None):
-    fig = pyplot.figure(facecolor='#c8e9b1')
+    fig = pyplot.figure(facecolor="#c8e9b1")
     if title is None:
-        title = 'Juvenile Spring Chinook'
+        title = "Juvenile Spring Chinook"
     fig.suptitle(title, fontsize=20)
     mass_plot = fig.add_subplot(221)
-    mass_plot.plot(results['mass'], label='Mass (g)')
-    mass_plot.set_ylabel('Mass (g)')
-    mass_plot.set_xlabel('Day of Month')
+    mass_plot.plot(results["mass"], label="Mass (g)")
+    mass_plot.set_ylabel("Mass (g)")
+    mass_plot.set_xlabel("Day of Month")
 
     growth_plot = fig.add_subplot(222)
-    growth_plot.plot(results['growth'])
-    growth_plot.set_ylabel('Growth (g/g/d)')
-    growth_plot.set_xlabel('Day of Month')
+    growth_plot.plot(results["growth"])
+    growth_plot.set_ylabel("Growth (g/g/d)")
+    growth_plot.set_xlabel("Day of Month")
 
     day_depth_plot = fig.add_subplot(223)
-    day_depth_plot.plot(results['day_depth'], 'black', label="Day Depth (m)")
-    day_depth_plot.set_ylabel('Day Depth (m)')
-    day_depth_plot.set_xlabel('Day of Month')
+    day_depth_plot.plot(results["day_depth"], "black", label="Day Depth (m)")
+    day_depth_plot.set_ylabel("Day Depth (m)")
+    day_depth_plot.set_xlabel("Day of Month")
     day_depth_plot.set_ylim(35, 0)
-    day_depth_plot.yticklabels = (np.arange(0, 35, 5))
+    day_depth_plot.yticklabels = np.arange(0, 35, 5)
 
     night_depth_plot = fig.add_subplot(224)
-    night_depth_plot.set_ylabel('Night Depth (m)')
-    night_depth_plot.set_xlabel('Day of Month')
-    night_depth_plot.plot(results['night_depth'], 'black',
-                          label="Night Depth (m)")
-    night_depth_plot.yticklabels = (np.arange(0, 35, 5))
+    night_depth_plot.set_ylabel("Night Depth (m)")
+    night_depth_plot.set_xlabel("Day of Month")
+    night_depth_plot.plot(results["night_depth"], "black", label="Night Depth (m)")
+    night_depth_plot.yticklabels = np.arange(0, 35, 5)
     night_depth_plot.set_ylim(35, 0)
 
     pyplot.subplots_adjust(top=0.3)
     fig.tight_layout(pad=1.08, h_pad=None, w_pad=None, rect=None)
 
     if filename:
-        pyplot.savefig(filename, facecolor=fig.get_facecolor(),
-                       edgecolor='lightblue')
+        pyplot.savefig(filename, facecolor=fig.get_facecolor(), edgecolor="lightblue")

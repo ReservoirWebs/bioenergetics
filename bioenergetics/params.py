@@ -22,11 +22,44 @@
 
 from csv import DictReader, DictWriter, QUOTE_NONNUMERIC
 
-KEYS = ['c_eq', 'CA', 'CB', 'CQ', 'CTO', 'CTM', 'CTL', 'CK1', 'CK4', 'respeq',
-        'RA', 'RB', 'RQ', 'RTO', 'RTM', 'RTL', 'RK1', 'RK4', 'ACT', 'BACT',
-        'SDA', 'egexeq', 'FA', 'FB', 'FG', 'UA', 'UB', 'UG', 'prededeq',
-        'energydensity', 'AlphaI', 'BetaI', 'cutoff', 'AlphaII', 'BetaII',
-        'swim_speed']
+KEYS = [
+    "c_eq",
+    "CA",
+    "CB",
+    "CQ",
+    "CTO",
+    "CTM",
+    "CTL",
+    "CK1",
+    "CK4",
+    "respeq",
+    "RA",
+    "RB",
+    "RQ",
+    "RTO",
+    "RTM",
+    "RTL",
+    "RK1",
+    "RK4",
+    "ACT",
+    "BACT",
+    "SDA",
+    "egexeq",
+    "FA",
+    "FB",
+    "FG",
+    "UA",
+    "UB",
+    "UG",
+    "prededeq",
+    "energydensity",
+    "AlphaI",
+    "BetaI",
+    "cutoff",
+    "AlphaII",
+    "BetaII",
+    "swim_speed",
+]
 """Key names for wrapped parameters"""
 
 
@@ -56,12 +89,20 @@ class FishParameters(object):
         self.params = params
         self._init_extra(*args, **kwargs)
 
-        assert int(self.prededeq) in [1, 2], \
-            "Predator energy density equation (prededeq) must be 1 or 2."
-        assert int(self.egexeq) in [1, 2, 3], \
-            "Egestion/excretion equation (exegeq) must be 1, 2, or 3."
-        assert int(self.c_eq) in [1, 2, 3], \
-            "Consumption equation (c_eq) must be 1, 2, or 3."
+        assert int(self.prededeq) in [
+            1,
+            2,
+        ], "Predator energy density equation (prededeq) must be 1 or 2."
+        assert int(self.egexeq) in [
+            1,
+            2,
+            3,
+        ], "Egestion/excretion equation (exegeq) must be 1, 2, or 3."
+        assert int(self.c_eq) in [
+            1,
+            2,
+            3,
+        ], "Consumption equation (c_eq) must be 1, 2, or 3."
 
     def _init_extra(self):
         """
@@ -92,7 +133,7 @@ class FishParameters(object):
         Returns:
             Nothing
         """
-        with open(filename, 'w') as fid:
+        with open(filename, "w") as fid:
             writer = DictWriter(fid, KEYS)
             writer.writeheader()
             writer.writerow(self.params)
@@ -104,16 +145,44 @@ class FishParameters(object):
             self.params = next(reader)
 
 
-CHINOOK_DEFAULTS = {'c_eq': 3.0, 'CA': 0.303, 'CB': -0.275, 'CQ': 5.0,
-                    'CTO': 15.0, 'CTM': 20.93, 'CTL': 24.05, 'CK1': 0.36,
-                    'CK4': 0.53, 'respeq': 1.0, 'RA': 0.00264,
-                    'RB': -0.217, 'RQ': 0.06818, 'RTO': 0.0234, 'RTM': 0.0,
-                    'RTL': 25.0, 'RK1': 1.0, 'RK4': 0.13, 'ACT': 9.7,
-                    'BACT': 0.0405, 'SDA': 0.172, 'egexeq': 3.0, 'FA': 0.212,
-                    'FB': -0.222, 'FG': 0.631, 'UA': 0.0314, 'UB': 0.58,
-                    'UG': -0.299, 'prededeq': 2.0, 'energydensity': 0.0,
-                    'AlphaI': 5764.0, 'BetaI': 0.9862, 'cutoff': 4000.0,
-                    'AlphaII': 7602.0, 'BetaII': 0.5266,'swim_speed':2.0}
+CHINOOK_DEFAULTS = {
+    "c_eq": 3.0,
+    "CA": 0.303,
+    "CB": -0.275,
+    "CQ": 5.0,
+    "CTO": 15.0,
+    "CTM": 20.93,
+    "CTL": 24.05,
+    "CK1": 0.36,
+    "CK4": 0.53,
+    "respeq": 1.0,
+    "RA": 0.00264,
+    "RB": -0.217,
+    "RQ": 0.06818,
+    "RTO": 0.0234,
+    "RTM": 0.0,
+    "RTL": 25.0,
+    "RK1": 1.0,
+    "RK4": 0.13,
+    "ACT": 9.7,
+    "BACT": 0.0405,
+    "SDA": 0.172,
+    "egexeq": 3.0,
+    "FA": 0.212,
+    "FB": -0.222,
+    "FG": 0.631,
+    "UA": 0.0314,
+    "UB": 0.58,
+    "UG": -0.299,
+    "prededeq": 2.0,
+    "energydensity": 0.0,
+    "AlphaI": 5764.0,
+    "BetaI": 0.9862,
+    "cutoff": 4000.0,
+    "AlphaII": 7602.0,
+    "BetaII": 0.5266,
+    "swim_speed": 2.0,
+}
 """Default bioenergetics parameters for Oncorhynchus tshawytscha."""
 
 
@@ -129,9 +198,9 @@ class Chinook(FishParameters):
             Defaults to "murphy"
     """
 
-    def _init_extra(self, length_eq='murphy'):
+    def _init_extra(self, length_eq="murphy"):
         length_eq = length_eq.lower()
-        if length_eq in ['murphy', 'macfarlane']:
+        if length_eq in ["murphy", "macfarlane"]:
             self.length_eq = length_eq
         else:
             raise ValueError('length_eq must be "murphy" or "macfarlane"')
@@ -142,18 +211,18 @@ class Chinook(FishParameters):
     def length_from_weight(self, w):
         """Return the fork length given a weight.
 
-           The constructor argument `length_eq` specifies which
-           relationship is used.
+        The constructor argument `length_eq` specifies which
+        relationship is used.
 
-           Args:
-               w: Weight in grams
+        Args:
+            w: Weight in grams
 
-           Returns:
-               The length in millimeters as a float.
+        Returns:
+            The length in millimeters as a float.
         """
-        if self.length_eq == 'murphy':
+        if self.length_eq == "murphy":
             # From LP and FC screw trap data (R2 = 0.9933)
             return (w / 0.000004) ** (1 / 3.1776)
-        elif self.length_eq == 'macfarlane':
+        elif self.length_eq == "macfarlane":
             # weight to fork length (MacFarlane and Norton 2008)
             return (w / 0.0003) ** (1 / 2.217)
