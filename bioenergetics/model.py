@@ -143,6 +143,7 @@ class Model:
         max_P=1.0,
         allow_functional_response=True,
         force_depth=None,
+        infection_stats=True,
     ):
         """Constructor method
 
@@ -187,6 +188,8 @@ class Model:
                 given depth value when computing growth. May be a pair of
                 values [day_depth, night_depth] or a scalar value which will
                 be used for both day and night. Defaults to None
+            infection_stats: Whether to compute copepod infection stats.
+                Defaults to True.
         """
         self.prey_data = prey_data
         self.light_extinction = light_extinction
@@ -208,6 +211,7 @@ class Model:
         self.allow_functional_response = allow_functional_response
         self.max_P = max_P
         self.force_depth = force_depth
+        self.infection_stats = infection_stats
 
     def compute_foragingbydepth(self, length, mass, surface_light, depth):
         """Specific encounter rate for a fish of given size at a given depth.
@@ -660,6 +664,41 @@ class Model:
         pop_est = consumable / (consumed * 4)
         return pop_est
 
+    def with_infection_stats(self, results):
+        # compute time at surface or 16-17 degrees
+        infect_hours = 0
+        passthroughs = 0
+        dts = results["day_temperature"]
+        nts = results["night_temperature"]
+        dds = results["day_depth"]
+        nds = results["night_depth"]
+        for i, daytemp in enumerate(results["day_temperature"]):
+            nighttemp = nts[i]
+            daydepth = dds[i]
+            nightdepth = nds[1]
+            if 16 <= daytemp <= 17 or daydepth <= 1:
+                infect_hours += self.day_hours
+            if 16 <= nighttemp <= 17 or nightdepth <= 1:
+                infect_hours += 24 - self.day_hours
+            if daytemp > 17 and nighttemp < 16:
+                passthroughs += 1
+            if i > 1 and daytemp > 17 and nts[i - 1] < 16:
+                passthroughs += 1
+
+        night_hours = 24.0 - self.day_hours
+        atus = sum(dts) * (self.day_hours / 24.0) + sum(nts) * (night_hours / 24.0)
+
+        size_risk = [1.01 ** (length - 60) for length in results["length"]]
+
+        results["infection_stats"] = {
+            "atus": atus,
+            "passthroughs": passthroughs,
+            "infect_hours": infect_hours,
+            "size_risk": size_risk,
+            "size_risk_avg": np.average(size_risk),
+        }
+        return results
+
     def run(self, n_days=30, start_date=None):
         """Simulate fish growth over a period of several days.
 
@@ -765,6 +804,8 @@ class Model:
 
         PopEst = self.sustainability_estimate(day_depth, dailyconsume)
         condition = float(100 * (mass - self.starting_mass) * ((length / 10) ** (-3.0)))
+        if self.infection_stats:
+            out = self.with_infection_stats(out)
         return (out, dailyconsume, condition, condition1, PopEst, day_P, night_P)
 
 

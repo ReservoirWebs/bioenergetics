@@ -1,0 +1,24 @@
+[tool.poetry]
+name = "bioenergetics"
+version = "0.1.0"
+description = "Combined bioenergetics and visual foraging model"
+authors = ["Chee Sing Lee <cheesinglee@gmail.com>"]
+license = "GNU GPLv3"
+
+[tool.poetry.dependencies]
+python = ">=3.7,<3.11"
+pytest = "^6.2.5"
+scipy = "^1.7.3"
+numpy = "^1.21.4"
+matplotlib = "^3.5.0"
+
+[tool.poetry.dev-dependencies]
+
+[tool.black]
+line-length = 80
+target-version = ['py38']
+exclude =  "migrations|\\.eggs"
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
