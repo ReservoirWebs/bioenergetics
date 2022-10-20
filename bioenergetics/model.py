@@ -23,6 +23,7 @@ from collections import defaultdict
 import numpy as np
 from scipy.interpolate import interp1d
 from scipy.optimize import minimize, brute
+from scipy import stats
 
 from bioenergetics import params
 
@@ -387,7 +388,7 @@ class Model:
         eq = self.params["respeq"]
         if eq == 1:
             if temperature > RTL:
-                VEL = RK1 * mass ** RK4
+                VEL = RK1 * W ** RK4
                 print(
                     "SOME OF THE INCLUDED TEMPERATURES ARE LETHAL, "
                     "PLEASE MODIFY THE TEMPERATURE TO EXCLUDE "
@@ -667,6 +668,7 @@ class Model:
     def with_infection_stats(self, results):
         # compute time at surface or 16-17 degrees
         infect_hours = 0
+        relative_infect_hours = 0
         passthroughs = 0
         dts = results["day_temperature"]
         nts = results["night_temperature"]
@@ -680,9 +682,18 @@ class Model:
                 infect_hours += self.day_hours
             if 16 <= nighttemp <= 17 or nightdepth <= 1:
                 infect_hours += 24 - self.day_hours
-            if daytemp > 17 and nighttemp < 16:
+            day_convert = self.day_hours/np.round(stats.norm.pdf(16.5, loc=16.5, scale=1), decimals=3)
+            day_prob = stats.norm.pdf(daytemp, loc=16.5, scale=1)
+            day_prob = np.round(day_prob, decimals=3)
+            relative_infect_hours += np.round(day_prob * day_convert, decimals=3)
+
+            night_convert = (24 - self.day_hours)/np.round(stats.norm.pdf(16.5, loc=16.5, scale=1), decimals=3)
+            night_prob = np.round(stats.norm.pdf(nighttemp, loc=16.5, scale=1), decimals=3)
+            relative_infect_hours += np.round(night_prob * night_convert, decimals=3)
+
+            if daytemp > 16.5 and nighttemp <= 16.5:
                 passthroughs += 1
-            if i > 1 and daytemp > 17 and nts[i - 1] < 16:
+            if i > 1 and daytemp > 16.5 and nts[i - 1] <= 16.5:
                 passthroughs += 1
 
         night_hours = 24.0 - self.day_hours
@@ -694,6 +705,7 @@ class Model:
             "atus": atus,
             "passthroughs": passthroughs,
             "infect_hours": infect_hours,
+            "weighted_infect_hours": relative_infect_hours,
             "size_risk": size_risk,
             "size_risk_avg": np.average(size_risk),
         }
